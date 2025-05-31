@@ -5,18 +5,30 @@ from communication import Communication
 con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
 
+estado = "ANDAR_FRENTE"
+id = 1
 while True:
-    if len(con.frame.robots_blue) > 0:
-        # vetor no plano (x, y) que liga o robô ao objetivo
-        objx = con.frame.ball.x - con.frame.robots_blue[0].x
-        objy = con.frame.ball.y - con.frame.robots_blue[0].y
-        angulo_obj = math.atan2(objy, objx)
-
-        print("Robô", con.frame.robots_blue[0].orientation, "Obj", angulo_obj)
-        if con.frame.robots_blue[0].orientation >= angulo_obj - 0.09 and con.frame.robots_blue[0].orientation <=  angulo_obj + 0.09:
-            print("ALINHOU!!!!")
-            con.sendOne(0, 0, 0, False)
-            time.sleep(0.1)
-        else:
-            con.sendOne(0, -10.5, 10.5, False)
-    time.sleep(0.01)
+    
+    if len(con.frame.robots_yellow) > 0:
+        bx = con.frame.ball.x
+        by = con.frame.ball.y
+        rx = con.frame.robots_yellow[id].x
+        ry = con.frame.robots_yellow[id].y
+        angulo_ro = math.atan2(by - ry, bx - rx)
+        angulo_r = con.frame.robots_yellow[id].orientation
+        if estado == "ANDAR_FRENTE":
+            con.sendOne(id, 15.5, 15.5)
+            t0 = con.env.step
+            estado = "ESPERA"
+        elif estado == "ESPERA":
+            t = con.env.step - t0
+            if (angulo_ro - angulo_r < -0.5 or angulo_ro - angulo_r > 0.5) and t > 800:
+                estado = "ALINHAR"
+            print(estado, "tempo decorrido:", t)
+        elif estado == "ALINHAR":
+            if angulo_ro - angulo_r >= -0.05 and angulo_ro - angulo_r <= 0.05:
+                estado = "ANDAR_FRENTE"
+                con.sendOne(id, 0, 0)
+            else:
+                con.sendOne(id, -4, 4)
+            print(estado, angulo_ro - angulo_r)
