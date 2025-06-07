@@ -20,25 +20,23 @@ while True:
         ry = con.frame.robots_yellow[id].y
         
         angulo_ro = math.atan2(objy - ry, objx - rx)
-
         angulo_r = con.frame.robots_yellow[id].orientation
 
         if estado == "ONDE_ESTOU":
-            if rx < 0 and ry > 0: #Q2
+            if rx > 0 and ry > 0: #Q1
+                objx = -0.38
+                objy = 0.44
+            elif rx < 0 and ry > 0: #Q2
                 objx = -0.38
                 objy = -0.44
             elif rx < 0 and ry < 0: #Q3
                 objx = 0.38
                 objy = -0.44
-            elif rx > 0 and ry < 0: #Q1
+            else: #Q4
                 objx = 0.38
                 objy = 0.44
-            else: # Q4
-                objx = -0.38
-                objy = 0.44
-            
+  
             estado = "ALINHAR"
-
 
         elif estado == "ANDAR_FRENTE":
             t2 = con.env.step
@@ -47,8 +45,8 @@ while True:
             else:
                 con.sendOne(id, 0, 0)
 
-            # Transição
-            objr = 0.03
+            # Condição de Transição
+            objr = 0.03 # região de objetivo
             if rx < objx+objr and rx > objx-objr and ry > objy-objr and ry < objy+objr:
                 print("Cheguei")
                 con.sendOne(id, 0, 0)
@@ -68,6 +66,7 @@ while True:
             else:
                 con.sendOne(id, -4, 4)
         
+        # Imprime transição de estado
         if estado != novo_estado:
-            print("Estado", estado)
+            print("[Estado]", estado)
             novo_estado = estado
