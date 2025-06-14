@@ -5,11 +5,50 @@ from communication import Communication
 con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
 
-estado = "ONDE_ESTOU"
-novo_estado = estado
+estado = "IR_ATE"
 id = 1
 objx = 0
 objy = 0
+
+vb = 35
+ce = 0
+cd = 0
+kp = 7.5
+
+t0 = 0
+
+def chegou(obj, robot):
+    d = math.sqrt((obj.x - robot.x)**2 + (obj.y - robot.y)**2)
+    print(d)
+    return d < 0.1
+
+def controladorP(angulo_ro, angulo_r):
+    erro = angulo_ro - angulo_r
+
+    if math.fabs(erro) > math.pi:
+        
+        if angulo_r < 0:
+            angulo_r = 2*math.pi + angulo_r
+        
+        if angulo_ro < 0:
+            angulo_ro = 2*math.pi + angulo_ro
+
+        erro = angulo_ro - angulo_r
+
+    ce = cd = 0
+
+    cr = kp*math.fabs(erro)
+
+    if erro > 0:
+        cd = cr
+        ce = -cr
+    elif erro < 0:
+        ce = cr
+        cd = -cr
+    
+    ve = vb + ce
+    vd = vb + cd
+    return ve, vd    
 
 while True:
     
@@ -19,54 +58,22 @@ while True:
         rx = con.frame.robots_yellow[id].x
         ry = con.frame.robots_yellow[id].y
         
-        angulo_ro = math.atan2(objy - ry, objx - rx)
+        angulo_ro = math.atan2(by - ry, bx - rx)
         angulo_r = con.frame.robots_yellow[id].orientation
 
-        if estado == "ONDE_ESTOU":
-            if rx > 0 and ry > 0: #Q1
-                objx = -0.38
-                objy = 0.44
-            elif rx < 0 and ry > 0: #Q2
-                objx = -0.38
-                objy = -0.44
-            elif rx < 0 and ry < 0: #Q3
-                objx = 0.38
-                objy = -0.44
-            else: #Q4
-                objx = 0.38
-                objy = 0.44
-  
-            estado = "ALINHAR"
-
-        elif estado == "ANDAR_FRENTE":
-            t2 = con.env.step
-            if (t2 - t1 > 600):
-                con.sendOne(id, 15.5, 15.5)
-            else:
+        if estado == "IR_ATE":
+            ve, vd = controladorP(angulo_ro, angulo_r)
+            con.sendOne(id, ve, vd)
+            if chegou(con.frame.ball, con.frame.robots_yellow[id]):
+                estado = "ESPERA"
+                t0 = con.env.step
                 con.sendOne(id, 0, 0)
-
-            # Condição de Transição
-            objr = 0.03 # região de objetivo
-            if rx < objx+objr and rx > objx-objr and ry > objy-objr and ry < objy+objr:
-                print("Cheguei")
-                con.sendOne(id, 0, 0)
-                estado = "ONDE_ESTOU"
-
+                
         elif estado == "ESPERA":
             t = con.env.step - t0
-            if (angulo_ro - angulo_r < -0.5 or angulo_ro - angulo_r > 0.5) and t > 800:
-                estado = "ALINHAR"
-            print(estado, "tempo decorrido:", t)
+            if t > 2000:
+                estado = "IR_ATE"
+            print(t)
+        time.sleep(0.1)
 
-        elif estado == "ALINHAR":
-            t1 = con.env.step
-            if angulo_ro - angulo_r >= -0.05 and angulo_ro - angulo_r <= 0.05:
-                estado = "ANDAR_FRENTE"
-                con.sendOne(id, 0, 0)
-            else:
-                con.sendOne(id, -4, 4)
         
-        # Imprime transição de estado
-        if estado != novo_estado:
-            print("[Estado]", estado)
-            novo_estado = estado
