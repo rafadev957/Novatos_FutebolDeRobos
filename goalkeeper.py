@@ -13,11 +13,10 @@ class Attacker:
         self.xobj = 0 #eixo X do objetivo do robô (bola)
         self.yobj = 0 #eixo Y do objetivo do robô (bola)
         self.estado = "PARADO" #estado do robô
-        self.vb = 40 #velocidade base das rodas
+        self.vb = 35 #velocidade base das rodas
         self.kp = 7.5 #ajuste do erro (controlador)
         self.t0 = 0 #tempo inicial de espera (0)
         self.con = None #comunicação
-        self.passos = 0 #passos do robô para dar ré
 
 
     def setCommunication(self, con):
@@ -80,36 +79,17 @@ class Attacker:
         self.vd = self.vb + cd
 
 
-    def wall_collision(self, x, y, t):
-        if (x <= -0.70 or x >= 0.70) or (y >= 0.60 or y <= -0.60) and t > self.t0:
-            return True
-        return False
-
-
-    def update(self): #estado do atacante
+    def update(self): #estado do goleiro
 
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "IR_ATE":
-            # Verifica se o robô bateu na parede
-            if self.wall_collision(self.x, self.y, t): #se wall_collision retornar True
-                self.estado = "RE" #muda o estado
-                print("dando ré")
-            else:
-                self.controladorP(angulo_ro)
-                self.con.sendOne(self.id, self.ve, self.vd)
+            self.controladorP(angulo_ro)
+            self.con.sendOne(self.id, self.ve, self.vd)
 
             if self.arrived():
                 self.estado = "ESPERA"
                 self.t0 = self.con.env.step
                 self.con.sendOne(self.id, 0, 0)
-        
-        elif self.estado == "RE":
-            self.con.sendOne(self.id, -10, -10)
-            self.passos += 1
-
-            if self.passos >= 30:
-                self.estado = "IR_ATE"
-                self.passos = 0
                 
         elif self.estado == "ESPERA":
             t = self.con.env.step - self.t0
