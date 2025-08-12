@@ -15,6 +15,7 @@ while True:
     if len(con.frame.robots_yellow) > 0:
 
         r0.setObj(con.frame.ball.x, con.frame.ball.y)
+
         r0.setPose(con.frame.robots_yellow[r0.id].x, 
                    con.frame.robots_yellow[r0.id].y, 
                    con.frame.robots_yellow[r0.id].orientation) 
