@@ -1,4 +1,4 @@
-import sys, os, time, math
+import sys, os, time
 sys.path.append(os.path.join(os.path.dirname(__file__), 'communication'))
 from communication import Communication
 from attacker import Attacker
