@@ -1,9 +1,7 @@
 import math
 class Attacker:
 
-    def __init__(self):
-
-        #métodos do robô
+    def __init__(self): #métodos do robô
         self.id = 0 #identidade
         self.x = 0 #eixo X do robô
         self.y = 0 #eixo Y do robô
@@ -20,33 +18,28 @@ class Attacker:
         self.con = None #comunicação
 
 
-    def setCommunication(self, con):
-        #comunicação do simulador e o código (robô)
+    def setCommunication(self, con): #comunicação do simulador e o código (robô)
         self.con = con
 
 
-    def arrived(self):
-        #distância do objetivo e o robô
+    def arrived(self): #distância do objetivo e o robô
         d = math.sqrt((self.xobj - self.x)**2 + (self.yobj - self.y)**2)
         #print("distância do robô ao obj: {}".format(d))
         return d < 0.1
 
 
-    def setObj(self, x, y):
-        #cria o objetivo do robô a partir do X e Y do robô
+    def setObj(self, x, y): #cria o objetivo do robô a partir do X e Y do robô
         self.xobj = x
         self.yobj = y
 
 
-    def setPose(self, x, y, orientation):
-        #cria a pose do robô, seu x, Y e orientação, a partir do con
+    def setPose(self, x, y, orientation): #cria a pose do robô (seu X, Y e Orientação) a partir da comunicação
         self.x = x
         self.y = y
         self.orientation = orientation
 
 
-    def controladorP(self, angulo_ro):
-        #calcula o "erro" do robô e a bola
+    def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
         erro = angulo_ro - self.orientation
 
         if math.fabs(erro) > math.pi:
@@ -75,14 +68,20 @@ class Attacker:
         self.vd = self.vb + cd
 
 
-    def wall_collision(self):
+    def wall_collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
-        margem_segura = 0.03
-        if (self.x <= (0.75 - margem_segura) or self.x >= (-0.75 - margem_segura)) or (self.y <= (0.65 - margem_segura) or self.y >= (-0.65 - margem_segura)):
-            print("seguro")
-            return False #paredes verticais
+        margem_segura = 0.05 #abrange as quinas campo
+        self.t0 = self.con.env.step
+        if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 - margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 - margem_segura)):
+            #assim que o robô sai da área segura, começa o timer
+            t = self.con.env.step - self.t0
+            print("t0: {}, t: {}".format(self.t0, t))
+            if t >= 6000:
+                print("seguro") #debuger
+                return False
+        
         else:
-            print("não seguro")
+            print("não seguro") #debuger
             return True
 
 
@@ -96,28 +95,28 @@ class Attacker:
 
             #verifica se o robô chegou no objetivo
             if self.arrived():
-                self.estado = "ESPERA"
-                self.t0 = self.con.env.step
+                #self.estado = "ESPERA"
+                #self.t0 = self.con.env.step #timer
                 self.con.sendOne(self.id, 0, 0)
 
-            elif self.wall_collision(): #se wall_collision retornar True
-                self.estado = "RE" #muda o estado
-                print("dando ré")
+        elif self.wall_collision(): #se wall_collision retornar True
+            self.estado = "RE" #muda o estado
 
         elif self.estado == "RE":
+            print("dando ré") #debuger da ré
             self.con.sendOne(self.id, -10, -10)
             self.passos += 1
 
-            if self.passos > 5: #conta x passos para tras
+            if self.passos >= 5: #conta x passos para trás
                 self.estado = "IR_ATE" #troca de estado
-                self.passos = 0
+                self.passos = 0 #reseta os passos
 
 
-        elif self.estado == "ESPERA":
-            t = self.con.env.step - self.t0
-            if t >= 2000: #tempo do simulador
-                self.estado = "IR_ATE"
-            print("tempo de espera do robô: {}".format(t))
+        #elif self.estado == "ESPERA":
+            #t = self.con.env.step - self.t0
+            #if t >= 2000: #tempo do simulador
+            #    self.estado = "IR_ATE"
+            #print("tempo de espera do robô: {}".format(t))
 
 
         elif self.estado == "PARADO":

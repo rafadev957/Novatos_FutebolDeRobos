@@ -9,10 +9,11 @@ con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
 
 r0.setCommunication(con)
+#adicionar mais robôs: r1.id = 1 ou r2.id = 2
 
 while True:
     
-    if len(con.frame.robots_yellow) > 0:
+    if len(con.frame.robots_yellow) > 0: #garante que haja algo na lista de robos
 
         r0.setObj(con.frame.ball.x, con.frame.ball.y)
 
