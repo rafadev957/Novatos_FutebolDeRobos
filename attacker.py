@@ -70,7 +70,7 @@ class Attacker:
 
     def wall_collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
-        margem_segura = 0.05 #abrange as quinas campo
+        margem_segura = 0.10 #abrange as quinas campo
         self.t0 = self.con.env.step
         if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 - margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 - margem_segura)):
             #assim que o robô sai da área segura, começa o timer
