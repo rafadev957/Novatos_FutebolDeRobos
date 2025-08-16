@@ -1,5 +1,5 @@
 import math
-class Attacker:
+class Goalkeeper:
 
     def __init__(self): #métodos do robô
         self.id = 0 #identidade padrão
@@ -34,41 +34,6 @@ class Attacker:
         self.orientation = orientation
 
 
-    def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
-        erro = angulo_ro - self.orientation
-
-        if math.fabs(erro) > math.pi:
-            
-            if self.orientation < 0:
-                self.orientation = 2*math.pi + self.orientation
-            
-            if angulo_ro < 0:
-                angulo_ro = 2*math.pi + angulo_ro
-
-            erro = angulo_ro - self.orientation
-
-        ce = cd = 0
-
-        cr = self.kp*math.fabs(erro)
-
-        if erro > 0:
-            cd = cr
-            ce = -cr
-
-        elif erro < 0:
-            ce = cr
-            cd = -cr
-        
-        self.ve = self.vb + ce
-        self.vd = self.vb + cd
-
-
-    def arrived(self): #distância do objetivo e o robô
-        d = math.sqrt((self.xobj - self.x)**2 + (self.yobj - self.y)**2)
-        print("distância do robô ao obj: {:.4f}".format(d))
-        return d < 0.1
-
-
     def wall_collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
         margem_segura = 0.1 #não para nas quinas, variável local
@@ -86,8 +51,8 @@ class Attacker:
                 return True
 
 
-    def update(self): #estados do atacante
-
+    def update(self): #estados do goleiro
+        
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "IR_ATE":
             self.controladorP(angulo_ro)

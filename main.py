@@ -2,6 +2,8 @@ import sys, os, time
 sys.path.append(os.path.join(os.path.dirname(__file__), 'communication'))
 from communication import Communication
 from attacker import Attacker
+from defender import Defender
+from goalkeeper import Goalkeeper
 
 r0 = Attacker()
 

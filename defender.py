@@ -1,5 +1,5 @@
 import math
-class Attacker:
+class Defender:
 
     def __init__(self): #métodos do robô
         self.id = 0 #identidade padrão
@@ -64,7 +64,11 @@ class Attacker:
 
 
     def arrived(self): #distância do objetivo e o robô
-        d = math.sqrt((self.xobj - self.x)**2 + (self.yobj - self.y)**2)
+        """
+        isto pode sofrer alterações, a área de defesa pode ser altera
+        -0.50 x e 0 y significa o local onde o robo 1 spawna
+        """
+        d = math.sqrt((-0.50 - self.x)**2 + (0 - self.y)**2) #defensor precisa estar na área de defesa
         print("distância do robô ao obj: {:.4f}".format(d))
         return d < 0.1
 
@@ -86,7 +90,7 @@ class Attacker:
                 return True
 
 
-    def update(self): #estados do atacante
+    def update(self): #estados do defensor
 
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "IR_ATE":
@@ -101,10 +105,8 @@ class Attacker:
 
             #verifica se o robô chegou no objetivo
             elif self.arrived():
-                pass
-                #self.estado = "ESPERA"
-                #self.t0 = self.con.env.step #timer
-                #self.con.sendOne(self.id, 0, 0)
+                self.estado = "ESPERA"
+                self.con.sendOne(self.id, 0, 0)
 
 
         elif self.estado == "RE":
@@ -117,10 +119,10 @@ class Attacker:
 
 
         elif self.estado == "ESPERA":
-            t = self.con.env.step - self.t0
-            if t >= 2000: #tempo do simulador
+            if self.xobj <= 0:
                 self.estado = "IR_ATE"
-            print("tempo de espera do robô: {}".format(t))
+                print("bola está na área de defesa")
+                #ideia: defensor vai na bola, depois volta ao local "objetivo"
 
 
         elif self.estado == "PARADO":
