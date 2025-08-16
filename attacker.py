@@ -71,16 +71,17 @@ class Attacker:
 
     def wall_collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
-        margem_segura = 1 #não para nas quinas, variável local
-        if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 - margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 - margem_segura)):
+        margem_segura = 0.1 #não para nas quinas, variável local
+        if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
+            self.teste = 0
             return False
         else:
             self.teste += 1
             print("contador para perigo: {}".format(self.teste)) #debuger
             #loop para ele não dar ré só por passar na margem
-            if self.teste >= 50:
+            if self.teste >= 45:
                 self.teste = 0
-                print("PERIGO"*5) #debuger
+                print("PERIGO "*5) #debuger
                 return True
 
 
@@ -98,7 +99,7 @@ class Attacker:
 
 
             #verifica se o robô chegou no objetivo
-            if self.arrived():
+            elif self.arrived():
                 pass
                 #self.estado = "ESPERA"
                 #self.t0 = self.con.env.step #timer
@@ -109,7 +110,7 @@ class Attacker:
             print("dando ré") #debuger da ré
             self.con.sendOne(self.id, -30, -30)
             self.passos += 1
-            if self.passos >= 8: #conta x passos para trás
+            if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
                 self.estado = "IR_ATE" #troca de estado
 
