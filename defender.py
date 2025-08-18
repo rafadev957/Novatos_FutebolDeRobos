@@ -69,11 +69,11 @@ class Defender:
         -0.50 x e 0 y significa o local onde o robo 1 spawna
         """
         d = math.sqrt((-0.50 - self.x)**2 + (0 - self.y)**2) #defensor precisa estar na área de defesa
-        print("distância do robô ao obj: {:.4f}".format(d))
+        #print("distância do robô ao obj: {:.4f}".format(d))
         return d < 0.1
 
 
-    def wall_collision(self): #colisão com parede
+    def collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
         margem_segura = 0.1 #não para nas quinas, variável local
         if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
@@ -82,11 +82,11 @@ class Defender:
 
         else:
             self.contador_re += 1
-            print("contador para perigo: {}".format(self.teste)) #debuger
+            #print("contador para perigo: {}".format(self.teste)) #debuger
             #loop para ele não dar ré só por passar na margem
             if self.contador_re >= 45:
                 self.contador_re = 0
-                print("PERIGO \n"*5) #debuger
+                #print("PERIGO \n"*5) #debuger
                 return True
 
 
@@ -99,7 +99,7 @@ class Defender:
 
 
             #verifica se o robô está fora do retangulo seguro
-            if self.wall_collision():
+            if self.collision():
                 self.estado = "RE" #muda o estado
 
 
@@ -110,7 +110,7 @@ class Defender:
 
 
         elif self.estado == "RE":
-            print("dando ré") #debuger da ré
+            #print("dando ré") #debuger da ré
             self.con.sendOne(self.id, -30, -30)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
