@@ -65,24 +65,27 @@ class Attacker:
 
     def arrived(self): #distância do objetivo e o robô
         d = math.sqrt((self.xobj - self.x)**2 + (self.yobj - self.y)**2)
-        print("distância do robô ao obj: {:.4f}".format(d))
+        #print("distância do robô ao obj: {:.4f}".format(d))
         return d < 0.1
 
 
-    def wall_collision(self): #colisão com parede
+    def collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
         margem_segura = 0.1 #não para nas quinas, variável local
         if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
             self.contador_re = 0
             return False
+        
+
+        #lógica de batida em robô: calcular a velocidade angular e linear do robô ao longo dos eixos
 
         else:
             self.contador_re += 1
-            print("contador para perigo: {}".format(self.teste)) #debuger
+            #print("contador para perigo: {}".format(self.contador_re)) #debuger
             #loop para ele não dar ré só por passar na margem
-            if self.contador_re >= 45:
+            if self.contador_re >= 40: #40 é mais ou menos 4 segundos no meu pc
                 self.contador_re = 0
-                print("PERIGO \n"*5) #debuger
+                #print("PERIGO \n"*5) #debuger
                 return True
 
 
@@ -95,7 +98,7 @@ class Attacker:
 
 
             #verifica se o robô está fora do retangulo seguro
-            if self.wall_collision():
+            if self.collision():
                 self.estado = "RE" #muda o estado
 
 
@@ -108,10 +111,10 @@ class Attacker:
 
 
         elif self.estado == "RE":
-            print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -30, -30)
+            #print("dando ré") #debuger da ré
+            self.con.sendOne(self.id, -40, -40)
             self.passos += 1
-            if self.passos >= 10: #conta x passos para trás
+            if self.passos >= 5: #conta x passos para trás
                 self.passos = 0 #reseta os passos
                 self.estado = "IR_ATE" #troca de estado
 
