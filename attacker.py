@@ -78,9 +78,9 @@ class Attacker:
 
         else:
             self.contador_re += 1
-            print("contador para perigo: {}".format(self.teste)) #debuger
+            print("contador para perigo: {}".format(self.contador_re)) #debuger
             #loop para ele não dar ré só por passar na margem
-            if self.contador_re >= 45:
+            if self.contador_re >= 45:   
                 self.contador_re = 0
                 print("PERIGO \n"*5) #debuger
                 return True
