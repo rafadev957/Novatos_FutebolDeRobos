@@ -81,7 +81,7 @@ class Attacker:
 
         else:
             self.contador_re += 1
-            print("contador para perigo: {}".format(self.teste)) #debuger
+            #print("contador para perigo: {}".format(self.teste)) #debuger
             #loop para ele não dar ré só por passar na margem
             if self.contador_re >= 45:
                 self.contador_re = 0
@@ -114,7 +114,7 @@ class Attacker:
             #print("dando ré") #debuger da ré
             self.con.sendOne(self.id, -40, -40)
             self.passos += 1
-            if self.passos >= 5: #conta x passos para trás
+            if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
                 self.estado = "IR_ATE" #troca de estado
 

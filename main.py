@@ -31,5 +31,5 @@ while True:
 
         #r0.update()
         r2.update()
-        print(con.frame.robots_yellow[r2.id].x, con.frame.robots_yellow[r2.id].y, con.frame.robots_yellow[r2.id].orientation)
+        #print(con.frame.robots_yellow[r2.id].x, con.frame.robots_yellow[r2.id].y, con.frame.robots_yellow[r2.id].orientation)
         time.sleep(0.1)
