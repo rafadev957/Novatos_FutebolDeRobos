@@ -15,7 +15,11 @@ class Attacker:
         self.kp = 7.5 #ajuste do erro (controlador)
         self.t0 = 0 #tempo inicial de espera
         self.passos = 0 #passos do robô para dar ré
-        self.contador_re = 0 #contador de tempo para a ré
+        self.contador = 0 #contador de tempo da ré e do stuck
+        self.tx = 0 #eixo x do robô após um determinado tempo
+        self.ty = 0 #eixo y do robô após um determinado tempo
+        self.var_posx = 0 #variação do eixo x do robô
+        self.var_posy = 0 #variação do eixo y do robô
         self.con = None #comunicação
 
 
@@ -23,7 +27,7 @@ class Attacker:
         self.con = con
 
 
-    def setObj(self, x, y): #cria o objetivo do robô a partir do X e Y do robô
+    def setObj(self, x, y): #cria o objetivo do robô sendo a bola a partir dos eixos X e Y do robô
         self.xobj = x
         self.yobj = y
 
@@ -33,6 +37,8 @@ class Attacker:
         self.y = y
         self.orientation = orientation
 
+
+    #LÓGICAS DO ROBÔ A BAIXO:
 
     def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
         erro = angulo_ro - self.orientation
@@ -69,66 +75,57 @@ class Attacker:
         return d < 0.1
 
 
-    def collision(self, tx, ty): #colisão com parede
+    def collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
         margem_segura = 0.1 #não para nas quinas, variável local
         if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
-            self.contador_re = 0
+            self.contador = 0
             return False
         
-        move_x = self.x
-        move_y = self.y
-        print(move_x - tx, move_y - ty)
-        if move_x - tx == 0 or move_y - ty: #esta parado / não consegue se movimentar
-            print("está parado / não se move")
-
-        #lógica de batida em robô: calcular a velocidade angular e linear do robô ao longo dos eixos
-
         else:
-            self.contador_re += 1
-            #print("contador para perigo: {}".format(self.teste)) #debuger
+            self.contador += 1
+            #print("contador para perigo: {}".format(self.contador_re)) #debuger
             #loop para ele não dar ré só por passar na margem
-            if self.contador_re >= 45:
-                self.contador_re = 0
+            if self.contador >= 45:
+                self.contador = 0
                 #print("PERIGO \n"*5) #debuger
                 return True
 
+    """
+    def stuck(self): #colisão com robôs
+        self.tx = self.x
+        self.ty = self.y
+        self.contador += 1
+        #print("timer stuck", self.contador) #debuger
+        if self.contador >= 20:
+            self.var_posx = abs(self.tx - self.x)
+            self.var_posy = abs(self.ty - self.y)
+            self.contador = 0
+
+        #verifica a diferença dos eixos
+        print("posx: {:.5f} | posy: {:.5f}".format(self.var_posx, self.var_posy)) #debuger
+        if self.var_posx <= 0.3 and self.var_posy <= 0.3:
+            return True #ta travado
+        else:
+            return False #não ta travado
+    """
+    
+    """
+    IDEIA: ATACANTE, CORRE ATRÁS DA BOLA COMO OBJETIVO, SE O OBJETIVO ESTIVER PERTO DO GOL
+    ELE PARA E VAI NA LINHA X = -0.50 E Y = 0, PARA DEFENDER O GOL IGUAL AO DEFENSOR
+    """
 
     def update(self): #estados do atacante
-
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "IR_ATE":
+            #corre atrás da bola
             self.controladorP(angulo_ro)
             self.con.sendOne(self.id, self.ve, self.vd)
 
-            tx = self.x
-            ty = self.y
-            self.t0 = self.con.env.step
-            t = 0
-            
-            while True:
-                contador += 1
-                if contador > 20:
-                    break
-
-            def isStuck(self ,tx, ty, t):
-                var_posx = tx - self.x
-                var_posy = ty - self.y
-                var_temp = t - self.t0
-                velocidade = (var_posx - var_posy) / var_temp
-                return velocidade
 
             #verifica se o robô está fora do retangulo seguro
-            if self.collision():
+            if self.collision(): # or self.stuck:
                 self.estado = "RE" #muda o estado
-
-
-            #verifica se o robô chegou no objetivo
-            elif self.arrived():
-                pass
-                #self.estado = "ESPERA"
-                #self.t0 = self.con.env.step #timer
-                #self.con.sendOne(self.id, 0, 0)
 
 
         elif self.estado == "RE":
@@ -148,4 +145,4 @@ class Attacker:
 
 
         elif self.estado == "PARADO":
-            self.estado = "IR_ATE"
+            self.estado = "IR_ATE"#

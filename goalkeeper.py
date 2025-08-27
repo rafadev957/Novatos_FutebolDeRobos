@@ -23,7 +23,7 @@ class Goalkeeper:
         self.con = con
 
 
-    def setObj(self, x, y): #cria o objetivo do robô a partir do X e Y do robô
+    def setObj(self, x, y): #cria o objetivo do robô sendo a bola a partir dos eixos X e Y do robô
         self.xobj = x
         self.yobj = y
 
@@ -34,10 +34,13 @@ class Goalkeeper:
         self.orientation = orientation
 
 
+    #LÓGICAS DO ROBÔ A BAIXO:
+
     def collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
-        margem_segura = 0.1 #não para nas quinas, variável local
-        if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
+        margem_segura = 0.1 #margem segura
+        #MUDAR OS X E Y DO RETÂNGULO PARA O GOLEIRO
+        if (self.x <= (0.60 - margem_segura) and self.x >= (-0.80 + margem_segura)) and (self.y <= (0.2 - margem_segura) and self.y >= (-0.2 + margem_segura)):
             self.contador_re = 0
             return False
 
@@ -47,11 +50,12 @@ class Goalkeeper:
             #loop para ele não dar ré só por passar na margem
             if self.contador_re >= 45:
                 self.contador_re = 0
-                print("PERIGO \n"*5) #debuger
+                #print("PERIGO \n"*5) #debuger
                 return True
 
 
     def AlignmentWithBall(self):
+        #velocidade base do goleiro
         self.vb = abs(self.yobj - self.y)*60 + 50*abs(self.xobj)/0.75 #Calculo da velocidade para alinhar com a bolinha (não sei se é a melhor forma de calcular a correção)
         #print(self.vb)
         if self.xobj < 0: #Para o goleiro amarelo: se a bola estiver no campo de defesa se alinha com a bolinha, se não centraliza
@@ -92,6 +96,7 @@ class Goalkeeper:
                 self.vd = self.vb
                 self.ve = self.vb
 
+
     def PositionCheck(self): 
         #Se o goleiro sair das linhas da trave, ele volta para o limite delas
         if self.y <= -0.19 - 0.02:
@@ -101,6 +106,7 @@ class Goalkeeper:
             self.ve = -30
             self.vd = -30
     
+
     def AlignmentWithX(self): #Se perder o alinhamento com x do gol (-0.7 ou -0.69) 
         self.xobj = -0.69
         self.yobj = 0
@@ -129,11 +135,12 @@ class Goalkeeper:
         if d <= 0.01:
             self.estado = "Alinhar_Vertical"
 
+
     def update(self): #estados do goleiro
         
         #angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "Alinhar_bolinha":
-            self.alignment()
+            self.AlignmentWithBall()
             self.con.sendOne(self.id, self.ve, self.vd)
 
             #Se perder o alinhamento com a vertical, realinhar com a vertical orientando apra cima
@@ -143,17 +150,11 @@ class Goalkeeper:
             #Se sair do ponto x = -0.7 (para o goleiro amarelo), reposicionar
             if self.x <= -0.69 - 0.01 or self.x >= -0.69 + 0.01: 
                 self.estado = "Reposicionar"
+                
             #verifica se o robô está fora do retangulo seguro
             '''if self.collision():
                 self.estado = "RE"''' #muda o estado
 
-
-            #verifica se o robô chegou no objetivo
-            #if self.arrived():
-                #pass
-                #self.estado = "ESPERA"
-                #self.t0 = self.con.env.step #timer
-                #self.con.sendOne(self.id, 0, 0)
 
         elif self.estado == "Alinhar_Vertical":
             erro = math.pi/2 - self.orientation #calculo do erro de alinhamento com a vertical se orientando para cima
@@ -167,24 +168,19 @@ class Goalkeeper:
                 self.con.sendOne(self.id,0,0)
                 self.estado = "Alinhar_Bolinha"
 
+
         elif self.estado == "Reposicionar":
             self.AlignmentWithX()
             self.con.sendOne(self.id,self.ve,self.vd)
-            
+        
+
         elif self.estado == "RE":
-            print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -30, -30)
+            #print("dando ré") #debuger da ré
+            self.con.sendOne(self.id, -40, -40)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
                 self.estado = "IR_ATE" #troca de estado
-
-
-        elif self.estado == "ESPERA":
-            t = self.con.env.step - self.t0
-            if t >= 2000: #tempo do simulador
-                self.estado = "IR_ATE"
-            print("tempo de espera do robô: {}".format(t))
 
 
         elif self.estado == "PARADO":

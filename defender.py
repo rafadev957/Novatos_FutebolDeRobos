@@ -23,9 +23,9 @@ class Defender:
         self.con = con
 
 
-    def setObj(self, x, y): #cria o objetivo do robô a partir do X e Y do robô
-        self.xobj = x
-        self.yobj = y
+    def setObj(self, x, y): #cria o objetivo do robô sendo a bola a partir dos eixos X e Y do robô
+        self.xobj = -0.3
+        self.yobj = 0
 
 
     def setPose(self, x, y, orientation): #cria a pose do robô (seu X, Y e Orientação) a partir da comunicação
@@ -33,6 +33,8 @@ class Defender:
         self.y = y
         self.orientation = orientation
 
+
+    #LÓGICAS DO ROBÔ A BAIXO:
 
     def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
         erro = angulo_ro - self.orientation
@@ -65,8 +67,8 @@ class Defender:
 
     def arrived(self): #distância do objetivo e o robô
         """
-        isto pode sofrer alterações, a área de defesa pode ser altera
-        -0.50 x e 0 y significa o local onde o robo 1 spawna
+        IDEIA, O DEFENSOR SEGUE A BOLA SEM SE MECHER, SE ELA PASSAR DA LINHA DO MEIO DE CAMPO ELE VAI NELA
+        SE ELA FOR PARA TRAS ELE VOLTA NO SPANW DELE E OLHA A BOLA DE NOVO E VAI NELA
         """
         d = math.sqrt((-0.50 - self.x)**2 + (0 - self.y)**2) #defensor precisa estar na área de defesa
         #print("distância do robô ao obj: {:.4f}".format(d))
@@ -111,7 +113,7 @@ class Defender:
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -30, -30)
+            self.con.sendOne(self.id, -40, -40)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos

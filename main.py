@@ -5,31 +5,48 @@ from attacker import Attacker
 from defender import Defender
 from goalkeeper import Goalkeeper
 
+#INICIALIZAÇÃO DOS ROBÔS COM AS CLASSES
 r0 = Attacker()
 r1 = Defender()
 r2 = Goalkeeper()
+
 con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
 
+#COMUNICAÇÃO DOS ROBÔS COM O SERVIDOR
 r0.setCommunication(con)
+r1.setCommunication(con)
 r2.setCommunication(con)
 
 while True:
     
     if len(con.frame.robots_yellow) > 0: #garante que haja algo na lista de robos
 
+        #OBJETIVOS DOS ROBÔS
         r0.setObj(con.frame.ball.x, con.frame.ball.y)
+        r1.setObj(con.frame.ball.x, con.frame.ball.y)
         r2.setObj(con.frame.ball.x, con.frame.ball.y)
 
+        #POSE DOS ROBÔS
         r0.setPose(con.frame.robots_yellow[r0.id].x, 
                    con.frame.robots_yellow[r0.id].y, 
-                   con.frame.robots_yellow[r0.id].orientation) 
+                   con.frame.robots_yellow[r0.id].orientation)
+        
+        r1.setPose(con.frame.robots_yellow[r0.id].x, 
+                   con.frame.robots_yellow[r0.id].y, 
+                   con.frame.robots_yellow[r0.id].orientation)
         
         r2.setPose(con.frame.robots_yellow[r2.id].x, 
                    con.frame.robots_yellow[r2.id].y, 
                    con.frame.robots_yellow[r2.id].orientation) 
 
+        #ATUALIZAÇÃO OS ROBÔS NO CAMPO
         r0.update()
+        #r1.update()
         #r2.update()
+
+        #TESTES DE SAIDAS AQUI:
         #print(con.frame.robots_yellow[r2.id].x, con.frame.robots_yellow[r2.id].y, con.frame.robots_yellow[r2.id].orientation)
+        
+        #DELAY DO TEMPO DE RESPOSTA DO SIMULADOR E O CÓDIGO
         time.sleep(0.1)
