@@ -2,7 +2,7 @@ import math
 class Defender:
 
     def __init__(self): #métodos do robô
-        self.id = 0 #identidade padrão
+        self.id = 1 #identidade padrão
         self.x = 0 #eixo X do robô
         self.y = 0 #eixo Y do robô
         self.orientation = 0 #orientação (radianos)

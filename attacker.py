@@ -69,13 +69,18 @@ class Attacker:
         return d < 0.1
 
 
-    def collision(self): #colisão com parede
+    def collision(self, tx, ty): #colisão com parede
         #tamanho do campo - margem = perigo
         margem_segura = 0.1 #não para nas quinas, variável local
         if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
             self.contador_re = 0
             return False
         
+        move_x = self.x
+        move_y = self.y
+        print(move_x - tx, move_y - ty)
+        if move_x - tx == 0 or move_y - ty: #esta parado / não consegue se movimentar
+            print("está parado / não se move")
 
         #lógica de batida em robô: calcular a velocidade angular e linear do robô ao longo dos eixos
 
@@ -96,6 +101,22 @@ class Attacker:
             self.controladorP(angulo_ro)
             self.con.sendOne(self.id, self.ve, self.vd)
 
+            tx = self.x
+            ty = self.y
+            self.t0 = self.con.env.step
+            t = 0
+            
+            while True:
+                contador += 1
+                if contador > 20:
+                    break
+
+            def isStuck(self ,tx, ty, t):
+                var_posx = tx - self.x
+                var_posy = ty - self.y
+                var_temp = t - self.t0
+                velocidade = (var_posx - var_posy) / var_temp
+                return velocidade
 
             #verifica se o robô está fora do retangulo seguro
             if self.collision():

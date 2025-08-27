@@ -6,13 +6,13 @@ from defender import Defender
 from goalkeeper import Goalkeeper
 
 r0 = Attacker()
+r1 = Defender()
 r2 = Goalkeeper()
 con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
 
 r0.setCommunication(con)
 r2.setCommunication(con)
-#adicionar mais robôs: r1.id = 1 ou r2.id = 2
 
 while True:
     
@@ -29,7 +29,12 @@ while True:
                    con.frame.robots_yellow[r2.id].y, 
                    con.frame.robots_yellow[r2.id].orientation) 
 
+<<<<<<< HEAD
         #r0.update()
         r2.update()
+=======
+        r0.update()
+        #r2.update()
+>>>>>>> 8742659 (testes de implementações)
         #print(con.frame.robots_yellow[r2.id].x, con.frame.robots_yellow[r2.id].y, con.frame.robots_yellow[r2.id].orientation)
         time.sleep(0.1)

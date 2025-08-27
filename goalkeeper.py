@@ -131,10 +131,16 @@ class Goalkeeper:
 
     def update(self): #estados do goleiro
         
+<<<<<<< HEAD
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "Alinhar_Bolinha":
             self.AlignmentWithBall()
             self.PositionCheck()
+=======
+        #angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
+        if self.estado == "Alinhar_bolinha":
+            self.alignment()
+>>>>>>> 8742659 (testes de implementações)
             self.con.sendOne(self.id, self.ve, self.vd)
 
             #Se perder o alinhamento com a vertical, realinhar com a vertical orientando apra cima
@@ -145,7 +151,7 @@ class Goalkeeper:
             if self.x <= -0.69 - 0.01 or self.x >= -0.69 + 0.01: 
                 self.estado = "Reposicionar"
             #verifica se o robô está fora do retangulo seguro
-            '''if self.wall_collision():
+            '''if self.collision():
                 self.estado = "RE"''' #muda o estado
 
 
