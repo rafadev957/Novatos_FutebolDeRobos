@@ -29,12 +29,7 @@ while True:
                    con.frame.robots_yellow[r2.id].y, 
                    con.frame.robots_yellow[r2.id].orientation) 
 
-<<<<<<< HEAD
-        #r0.update()
-        r2.update()
-=======
         r0.update()
         #r2.update()
->>>>>>> 8742659 (testes de implementações)
         #print(con.frame.robots_yellow[r2.id].x, con.frame.robots_yellow[r2.id].y, con.frame.robots_yellow[r2.id].orientation)
         time.sleep(0.1)

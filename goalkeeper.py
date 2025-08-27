@@ -131,16 +131,9 @@ class Goalkeeper:
 
     def update(self): #estados do goleiro
         
-<<<<<<< HEAD
-        angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        if self.estado == "Alinhar_Bolinha":
-            self.AlignmentWithBall()
-            self.PositionCheck()
-=======
         #angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "Alinhar_bolinha":
             self.alignment()
->>>>>>> 8742659 (testes de implementações)
             self.con.sendOne(self.id, self.ve, self.vd)
 
             #Se perder o alinhamento com a vertical, realinhar com a vertical orientando apra cima
