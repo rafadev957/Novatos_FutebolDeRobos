@@ -43,7 +43,7 @@ while True:
         #ATUALIZAÇÃO OS ROBÔS NO CAMPO
         r0.update()
         #r1.update()
-        #r2.update()
+        r2.update()
 
         #TESTES DE SAIDAS AQUI:
         #print(con.frame.robots_yellow[r2.id].x, con.frame.robots_yellow[r2.id].y, con.frame.robots_yellow[r2.id].orientation)
