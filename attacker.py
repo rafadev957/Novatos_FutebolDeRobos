@@ -12,7 +12,7 @@ class Attacker:
         self.yobj = 0 #eixo Y do objetivo do robô (bola)
         self.estado = "PARADO" #estado do robô
         self.vb = 40 #velocidade base das rodas
-        self.kp = 7.5 #ajuste do erro (controlador)
+        self.kp = 7.5 #ajuste do erro (controladorP)
         self.t0 = 0 #tempo inicial de espera
         self.passos = 0 #passos do robô para dar ré
         self.contador = 0 #contador de tempo da ré e do stuck
@@ -40,39 +40,53 @@ class Attacker:
 
     #LÓGICAS DO ROBÔ A BAIXO:
 
-    def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
+    def olhabola(self, angulo_ro):
         erro = angulo_ro - self.orientation
-
         if math.fabs(erro) > math.pi:
-            
             if self.orientation < 0:
                 self.orientation = 2*math.pi + self.orientation
-            
             if angulo_ro < 0:
                 angulo_ro = 2*math.pi + angulo_ro
-
             erro = angulo_ro - self.orientation
-
         ce = cd = 0
-
         cr = self.kp*math.fabs(erro)
-
         if erro > 0:
             cd = cr
             ce = -cr
-
         elif erro < 0:
             ce = cr
             cd = -cr
+        self.ve = self.vb + ce
+        self.vd = self.vb + cd
         
+        self.con.sendOne(self.id, self.ve, self.vd)
+        
+
+
+    def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
+        erro = angulo_ro - self.orientation
+        if math.fabs(erro) > math.pi:
+            if self.orientation < 0:
+                self.orientation = 2*math.pi + self.orientation
+            if angulo_ro < 0:
+                angulo_ro = 2*math.pi + angulo_ro
+            erro = angulo_ro - self.orientation
+        ce = cd = 0
+        cr = self.kp*math.fabs(erro)
+        if erro > 0:
+            cd = cr
+            ce = -cr
+        elif erro < 0:
+            ce = cr
+            cd = -cr
         self.ve = self.vb + ce
         self.vd = self.vb + cd
 
 
     def arrived(self): #distância do objetivo e o robô
-        d = math.sqrt((self.xobj - self.x)**2 + (self.yobj - self.y)**2)
+        d = math.sqrt((-0.37 - self.x)**2 + (0 - self.y)**2)
         #print("distância do robô ao obj: {:.4f}".format(d))
-        return d < 0.1
+        return d
 
 
     def collision(self): #colisão com parede
@@ -84,7 +98,7 @@ class Attacker:
         
         else:
             self.contador += 1
-            #print("contador para perigo: {}".format(self.contador_re)) #debuger
+            print("contador para perigo: {}".format(self.contador)) #debuger
             #loop para ele não dar ré só por passar na margem
             if self.contador >= 45:
                 self.contador = 0
@@ -109,7 +123,8 @@ class Attacker:
         else:
             return False #não ta travado
     """
-    
+
+
     """
     IDEIA: ATACANTE, CORRE ATRÁS DA BOLA COMO OBJETIVO, SE O OBJETIVO ESTIVER PERTO DO GOL
     ELE PARA E VAI NA LINHA X = -0.50 E Y = 0, PARA DEFENDER O GOL IGUAL AO DEFENSOR
@@ -117,7 +132,7 @@ class Attacker:
 
     def update(self): #estados do atacante
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        if self.estado == "IR_ATE":
+        if self.estado == "ATACAR":
             #corre atrás da bola
             self.controladorP(angulo_ro)
             self.con.sendOne(self.id, self.ve, self.vd)
@@ -128,21 +143,38 @@ class Attacker:
                 self.estado = "RE" #muda o estado
 
 
+            #verifica antes de mandar o robô só seguir a bola, talvez marcando um ponto contra
+            elif self.xobj < 0 or self.collision == False: #a bola passou do meio de campo, ta na área de defesa amarela, ele para de correr igual louco
+                self.estado = "DEFENDER"
+
+
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
             self.con.sendOne(self.id, -40, -40)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
-                self.estado = "IR_ATE" #troca de estado
+                self.estado = "ATACAR" #troca de estado
 
 
-        elif self.estado == "ESPERA":
-            t = self.con.env.step - self.t0
-            if t >= 2000: #tempo do simulador
-                self.estado = "IR_ATE"
-            print("tempo de espera do robô: {}".format(t))
+        elif self.estado == "DEFENDER":
+            #recalcula o angulo do obj, neste caso, o ponto de "pênalti" do time azul
+            angulo_ro = math.atan2(0 - self.y, -0.37 - self.x)
+            self.controladorP(angulo_ro)
+            self.con.sendOne(self.id, self.ve, self.vd)
+            
+            if self.arrived() < 0.1:
+                self.con.sendOne(self.id, 0, 0)
+                print("parado")
+                self.estado = "OLHA_BOLA"
+            
+            if self.estado == "OLHA_BOLA":
+                angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
+                #print(self.orientation, angulo_ro)
+                self.olhabola(angulo_ro)
+                self.estado = "ATACAR"
+
 
 
         elif self.estado == "PARADO":
-            self.estado = "IR_ATE"#
+            self.estado = "ATACAR"
