@@ -84,7 +84,7 @@ class Attacker:
 
 
     def arrived(self): #distância do objetivo e o robô
-        d = math.sqrt((-0.37 - self.x)**2 + (0 - self.y)**2)
+        d = math.sqrt((0.10 - self.x)**2 + (0 - self.y)**2)
         #print("distância do robô ao obj: {:.4f}".format(d))
         return d
 
@@ -98,7 +98,7 @@ class Attacker:
         
         else:
             self.contador += 1
-            print("contador para perigo: {}".format(self.contador)) #debuger
+            #print("contador para perigo: {}".format(self.contador)) #debuger
             #loop para ele não dar ré só por passar na margem
             if self.contador >= 45:
                 self.contador = 0
@@ -126,26 +126,31 @@ class Attacker:
 
 
     """
-    IDEIA: ATACANTE, CORRE ATRÁS DA BOLA COMO OBJETIVO, SE O OBJETIVO ESTIVER PERTO DO GOL
-    ELE PARA E VAI NA LINHA X = -0.50 E Y = 0, PARA DEFENDER O GOL IGUAL AO DEFENSOR
+    IDEIA: ATACANTE, CORRE ATRÁS DA BOLA COMO OBJETIVO, SE A BOLINHA ESTIVER NO CAMPO DE DEFESA
+    ELE PARA E VAI NA LINHA X = 0 E Y = 0, PARA ESPERAR A BOLA VOLTA AO CAMPO DE ATAQUE
     """
 
     def update(self): #estados do atacante
-        angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.estado == "ATACAR":
             #corre atrás da bola
+            angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
             self.controladorP(angulo_ro)
             self.con.sendOne(self.id, self.ve, self.vd)
 
+            if self.xobj < 0: #se a bola for no campo de defesa, espera
+                self.estado = "ESPERA"
 
             #verifica se o robô está fora do retangulo seguro
-            if self.collision(): # or self.stuck:
+            if self.collision(): #or self.stuck
                 self.estado = "RE" #muda o estado
 
 
-            #verifica antes de mandar o robô só seguir a bola, talvez marcando um ponto contra
-            elif self.xobj < 0 or self.collision == False: #a bola passou do meio de campo, ta na área de defesa amarela, ele para de correr igual louco
-                self.estado = "DEFENDER"
+        elif self.estado == "IR_CAMPO": #vai no campo de ataque
+            angulo_ro = math.atan2(0 - self.y, 0.10 - self.x) #segue retão até o objetivo a frente do meio de campo
+            self.controladorP(angulo_ro)
+            self.con.sendOne(self.id, self.ve, self.vd)
+            if self.x > 0: #ta no campo de ataque
+                self.estado = "ATACAR" #só depois de estar no campo de ataque que ele troca de estado
 
 
         elif self.estado == "RE":
@@ -157,24 +162,11 @@ class Attacker:
                 self.estado = "ATACAR" #troca de estado
 
 
-        elif self.estado == "DEFENDER":
-            #recalcula o angulo do obj, neste caso, o ponto de "pênalti" do time azul
-            angulo_ro = math.atan2(0 - self.y, -0.37 - self.x)
-            self.controladorP(angulo_ro)
-            self.con.sendOne(self.id, self.ve, self.vd)
-            
-            if self.arrived() < 0.1:
-                self.con.sendOne(self.id, 0, 0)
-                print("parado")
-                self.estado = "OLHA_BOLA"
-            
-            if self.estado == "OLHA_BOLA":
-                angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-                #print(self.orientation, angulo_ro)
-                self.olhabola(angulo_ro)
+        elif self.estado == "ESPERA":
+            self.sendOne(self.id, 0, 0)
+            if self.xobj > 0: #a bola ta no campo de ataque
                 self.estado = "ATACAR"
 
 
-
         elif self.estado == "PARADO":
-            self.estado = "ATACAR"
+            self.estado = "IR_CAMPO"

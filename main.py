@@ -5,7 +5,7 @@ from attacker import Attacker
 from defender import Defender
 from goalkeeper import Goalkeeper
 
-#INICIALIZAÇÃO DOS ROBÔS COM AS CLASSES
+#INICIALIZAÇÃO DOS ROBÔS COM AS RESPECTIVAS CLASSES
 r0 = Attacker()   #FICA NO CAMPO DE ATAQUE
 r1 = Defender()   #FICA NO CAMPO DE DEFESA
 r2 = Goalkeeper() #FICA NO CAMPO DO GOL
@@ -22,27 +22,25 @@ while True:
     
     if len(con.frame.robots_yellow) > 0: #garante que haja algo na lista de robos
 
-        #OBJETIVOS DOS ROBÔS
-        r0.setObj(con.frame.ball.x, con.frame.ball.y)
-        r1.setObj(con.frame.ball.x, con.frame.ball.y)
-        r2.setObj(con.frame.ball.x, con.frame.ball.y)
-
-        #POSE DOS ROBÔS
+        #POSE DOS ROBÔS EM RELAÇÃO COM O MUNDO
         r0.setPose(con.frame.robots_yellow[r0.id].x, 
                    con.frame.robots_yellow[r0.id].y, 
                    con.frame.robots_yellow[r0.id].orientation)
-        
         r1.setPose(con.frame.robots_yellow[r0.id].x, 
                    con.frame.robots_yellow[r0.id].y, 
                    con.frame.robots_yellow[r0.id].orientation)
-        
         r2.setPose(con.frame.robots_yellow[r2.id].x, 
                    con.frame.robots_yellow[r2.id].y, 
                    con.frame.robots_yellow[r2.id].orientation) 
 
+        #OBJETIVOS DOS ROBÔS
+        r0.setObj(con.frame.ball.x, con.frame.ball.y)
+        r2.setObj(con.frame.ball.x, con.frame.ball.y)
+
+
         #ATUALIZAÇÃO OS ROBÔS NO CAMPO
-        r0.update()
-        #r1.update()
+        #r0.update()
+        r1.update()
         #r2.update()
 
         #TESTES DE SAIDAS AQUI:

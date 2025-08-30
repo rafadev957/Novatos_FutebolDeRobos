@@ -36,43 +36,13 @@ class Defender:
 
     #LÓGICAS DO ROBÔ A BAIXO:
 
-    def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
-        erro = angulo_ro - self.orientation
-
-        if math.fabs(erro) > math.pi:
-            
-            if self.orientation < 0:
-                self.orientation = 2*math.pi + self.orientation
-            
-            if angulo_ro < 0:
-                angulo_ro = 2*math.pi + angulo_ro
-
-            erro = angulo_ro - self.orientation
-
-        ce = cd = 0
-
-        cr = self.kp*math.fabs(erro)
-
-        if erro > 0:
-            cd = cr
-            ce = -cr
-
-        elif erro < 0:
-            ce = cr
-            cd = -cr
-        
-        self.ve = self.vb + ce
-        self.vd = self.vb + cd
-
-
     def arrived(self): #distância do objetivo e o robô
         """
-        IDEIA, O DEFENSOR SEGUE A BOLA SEM SE MECHER, SE ELA PASSAR DA LINHA DO MEIO DE CAMPO ELE VAI NELA
-        SE ELA FOR PARA TRAS ELE VOLTA NO SPANW DELE E OLHA A BOLA DE NOVO E VAI NELA
+        IDEIA: O DEFENSOR SEGUE A BOLA NO EIXO Y, SE ELA PASSA O MEIO DO CAMPO SÓ O DEFENSOR ATUA
         """
-        d = math.sqrt((-0.50 - self.x)**2 + (0 - self.y)**2) #defensor precisa estar na área de defesa
+        d = math.sqrt((self.con.frame.ball.x - self.x)**2 + (self.con.frame.ball.y - self.y)**2)
         #print("distância do robô ao obj: {:.4f}".format(d))
-        return d < 0.1
+        return d < 0.1 #retorna a distância quando for menor que 0.1
 
 
     def collision(self): #colisão com parede
@@ -94,12 +64,9 @@ class Defender:
 
     def update(self): #estados do defensor
 
-        angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        if self.estado == "IR_ATE":
-            self.controladorP(angulo_ro)
-            self.con.sendOne(self.id, self.ve, self.vd)
+        self.setObj(self.x, self.con.frame.ball.y) #obj do robô é o seu próprio x e a posição do eixo y da bola
 
-
+        if self.estado == "ALINHAR":
             #verifica se o robô está fora do retangulo seguro
             if self.collision():
                 self.estado = "RE" #muda o estado
@@ -108,24 +75,22 @@ class Defender:
             #verifica se o robô chegou no objetivo
             elif self.arrived():
                 self.estado = "ESPERA"
-                self.con.sendOne(self.id, 0, 0)
 
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -40, -40)
+            self.con.sendOne(self.id, -30, -30)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
-                self.estado = "IR_ATE" #troca de estado
+                self.estado = "ALINHAR" #troca de estado
 
 
         elif self.estado == "ESPERA":
-            if self.xobj <= 0:
-                self.estado = "IR_ATE"
-                print("bola está na área de defesa")
-                #ideia: defensor vai na bola, depois volta ao local "objetivo"
+            self.con.sendOne(self.id, 0, 0)
+            if (self.yobj - self.y) > 0.1: #se a diferença do eixo y da bola com o do robô
+                self.estado = "ALINHAR"
 
 
         elif self.estado == "PARADO":
-            self.estado = "IR_ATE"
+            self.estado = "ALINHAR"

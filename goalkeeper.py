@@ -175,7 +175,7 @@ class Goalkeeper:
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -40, -40)
+            self.con.sendOne(self.id, -30, -30)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
