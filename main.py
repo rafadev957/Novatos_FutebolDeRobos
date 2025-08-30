@@ -6,9 +6,9 @@ from defender import Defender
 from goalkeeper import Goalkeeper
 
 #INICIALIZAÇÃO DOS ROBÔS COM AS CLASSES
-r0 = Attacker()
-r1 = Defender()
-r2 = Goalkeeper()
+r0 = Attacker()   #FICA NO CAMPO DE ATAQUE
+r1 = Defender()   #FICA NO CAMPO DE DEFESA
+r2 = Goalkeeper() #FICA NO CAMPO DO GOL
 
 con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
