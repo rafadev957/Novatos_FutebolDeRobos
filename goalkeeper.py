@@ -52,6 +52,12 @@ class Goalkeeper:
                 self.contador_re = 0
                 #print("PERIGO \n"*5) #debuger
                 return True
+    
+
+    def arrived(self): #distância do objetivo e o robô
+        d = math.sqrt((self.con.frame.ball.x - self.x)**2 + (self.con.frame.ball.y - self.y)**2)
+        #print("distância do robô ao obj: {:.4f}".format(d))
+        return d < 0.07 #retorna a distância quando for menor que 0.09
 
 
     def AlignmentWithBall(self):
@@ -61,15 +67,18 @@ class Goalkeeper:
         if self.xobj < 0: #Para o goleiro amarelo: se a bola estiver no campo de defesa se alinha com a bolinha, se não centraliza
             #quando a bolinha esta dentro das linhas da trave
             if self.yobj<= 0.19 and self.yobj >= -0.19:
-                if self.y <= self.yobj:
+                if self.y + 0.02 <= self.yobj and self.y - 0.02 <= self.yobj:
                     self.vd = self.vb
                     self.ve = self.vb
-                else: 
+                elif self.y + 0.02 >= self.yobj and self.y - 0.02 >= self.yobj: 
                     self.vd = -self.vb
                     self.ve = -self.vb
+                else:
+                    self.vd = 0
+                    self.ve = 0
             #quando esta acima das traves
             elif self.yobj > 0.19:
-                if self.y < 0.19:
+                if self.y + 0.02 < 0.19 and self.y - 0.02 < 0.19:
                     self.vd = self.vb
                     self.ve = self.vb
                 else:
@@ -77,7 +86,7 @@ class Goalkeeper:
                     self.ve = 0
             #quando esta abaixo das traves
             elif self.yobj < -0.19:
-                if self.y > -0.19:
+                if self.y + 0.02 > -0.19 and self.y - 0.02 > -0.19:
                     self.vd = -self.vb
                     self.ve = -self.vb
                 else:
@@ -130,32 +139,35 @@ class Goalkeeper:
             self.ve = -cr
             self.vd = cr
         else: #Se estiver alinhado anda reto
-            self.ve = 10
-            self.vd = 10
+            self.ve = 30
+            self.vd = 30
         if d <= 0.01:
-            self.estado = "Alinhar_Vertical"
-
+            self.estado = "ALINHAR_VERTICAL"
+        
 
     def update(self): #estados do goleiro
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        if self.estado == "Alinhar_Bolinha":
+        if self.estado == "ALINHAR_BOLINHA":
             self.AlignmentWithBall()
             self.PositionCheck()
             self.con.sendOne(self.id, self.ve, self.vd)
+            if self.arrived():
+                self.con.sendOne(self.id, 0, 0)
+                self.estado = "CHUTAR"
 
             #Se perder o alinhamento com a vertical, realinhar com a vertical orientando apra cima
             if self.orientation <= math.pi/2 - 0.001 or self.orientation >= math.pi/2 + 0.001:
-                self.estado = "Alinhar_Vertical"
+                self.estado = "ALINHAR_VERTICAL"
 
             #Se sair do ponto x = -0.69 (para o goleiro amarelo), reposicionar
             if self.x <= -0.69 - 0.01 or self.x >= -0.69 + 0.01: 
-                self.estado = "Reposicionar"
+                self.estado = "REPOSICIONAR"
             #verifica se o robô está fora do retangulo seguro
             '''if self.collision():
                 self.estado = "RE"''' #muda o estado
 
 
-        elif self.estado == "Alinhar_Vertical":
+        elif self.estado == "ALINHAR_VERTICAL":
             erro = math.pi/2 - self.orientation #calculo do erro de alinhamento com a vertical se orientando para cima
             vr = abs(erro)*10 #calculo da velocidade de rotação proporcional ou tamanho do erro
         
@@ -165,13 +177,24 @@ class Goalkeeper:
                 self.con.sendOne(self.id,vr,-vr)
             else:
                 self.con.sendOne(self.id,0,0)
-                self.estado = "Alinhar_Bolinha"
+                self.estado = "ALINHAR_BOLINHA"
 
 
-        elif self.estado == "Reposicionar":
+        elif self.estado == "REPOSICIONAR":
             self.AlignmentWithX()
             self.con.sendOne(self.id,self.ve,self.vd)
         
+        
+        elif self.estado == "CHUTAR":
+            #Se o robo estiver na parte superior do campo chuta rodando no sentido anti-horario
+            if self.y >= 0:
+                self.con.sendOne(self.id,-self.vb,self.vb)
+            #Se o robo estiver na parte inferior do campo chuta rodando no sentido horario
+            elif self.y < 0:
+                self.con.sendOne(self.id,self.vb,-self.vb)
+            d = math.sqrt((self.xobj - self.x)**2 +(self.yobj - self.y)**2)
+            if d >= 0.2:
+                self.estado = "ALINHAR_BOLINHA"
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
@@ -180,8 +203,7 @@ class Goalkeeper:
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
                 self.estado = "IR_ATE" #troca de estado
-
-
+    
         elif self.estado == "PARADO":
-            self.estado = "Alinhar_Vertical"
+            self.estado = "ALINHAR_VERTICAL"
             
