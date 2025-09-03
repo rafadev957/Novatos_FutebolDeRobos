@@ -85,9 +85,9 @@ class Defender:
             self.ve = -cr
             self.vd = cr
         else: #Se estiver alinhado anda reto
-            self.ve = 20+50*(self.x-x_ponto )
-            self.vd = 20+50*(self.x-x_ponto )
-        if d <= 0.035:
+            self.ve = 20+40*(self.x-x_ponto )
+            self.vd = 20+40*(self.x-x_ponto )
+        if d <= 0.03:
             self.ve = 0
             self.vd = 0
             self.estado = "ALINHAR_VERTICAL"
@@ -155,6 +155,7 @@ class Defender:
         
         
     def update(self): #estados do defensor
+        print(self.estado)
         #Se a bolinha estiver fora da área de atuação do defensor faça: 
         if self.xobj >= 0 or self.xobj < -0.375: 
             if self.estado == "ALINHAR":
@@ -174,7 +175,7 @@ class Defender:
                 
             elif self.estado == "ALINHAR_BOLINHA":
                 #Para evitar com que o robô trave no estado de alinhar a bolinha fora do local determinado
-                if self.xobj > -0.375 and self.x < -0.35 and self.x > -0.39: 
+                if self.xobj > -0.375 and self.x < -0.35 and self.x > -0.40: 
                     self.AlignmentWithBall()
                     self.con.sendOne(self.id, self.ve, self.vd) 
                 else:
