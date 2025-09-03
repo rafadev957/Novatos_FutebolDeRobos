@@ -12,7 +12,7 @@ class Defender:
         self.yobj = 0 #eixo Y do objetivo do robô (bola)
         self.estado = "PARADO" #estado do robô
         self.vb = 40 #velocidade base das rodas
-        self.kp = 9 #ajuste do erro (controlador)
+        self.kp = 10 #ajuste do erro (controlador)
         self.t0 = 0 #tempo inicial de espera
         self.passos = 0 #passos do robô para dar ré
         self.contador_re = 0 #contador de tempo para a ré
@@ -85,9 +85,9 @@ class Defender:
             self.ve = -cr
             self.vd = cr
         else: #Se estiver alinhado anda reto
-            self.ve = 30
-            self.vd = 30
-        if d <= 0.02:
+            self.ve = 20+50*(self.x-x_ponto )
+            self.vd = 20+50*(self.x-x_ponto )
+        if d <= 0.035:
             self.ve = 0
             self.vd = 0
             self.estado = "ALINHAR_VERTICAL"
@@ -110,28 +110,51 @@ class Defender:
 
     def controladorP(self): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        erro = angulo_ro - self.orientation
-        if math.fabs(erro) > math.pi:
+        erro1 = angulo_ro - self.orientation
+        if math.fabs(erro1) > math.pi:
             if self.orientation < 0:
                 self.orientation = 2*math.pi + self.orientation
             if angulo_ro < 0:
                 angulo_ro = 2*math.pi + angulo_ro
-            erro = angulo_ro - self.orientation
-        ce = cd = 0
-        cr = self.kp*math.fabs(erro)
+            erro1 = angulo_ro - self.orientation
         
-        if erro > 0:
-            cd = cr
-            ce = -cr
-        elif erro < 0:
-            ce = cr
-            cd = -cr
-        self.ve = self.vb + ce
-        self.vd = self.vb + cd
-            
+        angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
+        self.orientation = -(math.pi-self.orientation)
+        erro2 = self.orientation - angulo_ro 
+        if math.fabs(erro2) > math.pi:
+            if self.orientation < 0:
+                self.orientation = 2*math.pi + self.orientation
+            if angulo_ro < 0:
+                angulo_ro = 2*math.pi + angulo_ro
+            erro2 = self.orientation - angulo_ro 
+        print(erro1,erro2)
+        
+        if abs(erro1) < abs(erro2):
+            ce = cd = 0
+            cr = self.kp*math.fabs(erro1)
+            if erro1 > 0:
+                ce = -cr
+                cd = cr
+            elif erro1 < 0:
+                ce = cr
+                cd = -cr
+            self.ve = self.vb + ce
+            self.vd = self.vb + cd
+        else:   
+            ce = cd = 0
+            cr = self.kp*math.fabs(erro2)
+            if erro2 > 0:
+                ce = cr
+                cd = -cr
+            elif erro2 < 0:
+                ce = -cr
+                cd = cr
+            self.ve = -self.vb + ce
+            self.vd = -self.vb + cd
+        
+        
         
     def update(self): #estados do defensor
-        print(self.estado)
         #Se a bolinha estiver fora da área de atuação do defensor faça: 
         if self.xobj >= 0 or self.xobj < -0.375: 
             if self.estado == "ALINHAR":
