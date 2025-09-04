@@ -1,7 +1,7 @@
 import math
 class Goalkeeper:
 
-    def __init__(self): #métodos do robô
+    def __init__(self): #atributos do robô
         self.id = 2 #identidade padrão
         self.x = 0 #eixo X do robô
         self.y = 0 #eixo Y do robô

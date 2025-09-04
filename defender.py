@@ -1,7 +1,7 @@
 import math
 class Defender:
 
-    def __init__(self): #métodos do robô
+    def __init__(self): #atributos do robô
         self.id = 1 #identidade padrão
         self.x = 0 #eixo X do robô
         self.y = 0 #eixo Y do robô
@@ -169,6 +169,7 @@ class Defender:
                 self.vd = 7
         
     def update(self): #estados do defensor
+<<<<<<< HEAD
         #Se a bolinha estiver fora da área de atuação do defensor faça: 
         if self.xobj >= 0 or self.xobj < -0.375: 
             if self.estado == "ALINHAR":
@@ -203,6 +204,20 @@ class Defender:
         #verifica se o robô está fora do retangulo seguro
         if self.collision():
             self.estado = "RE" #muda o estado
+=======
+        #a coordenada y do robô é igual ao y da bola
+        self.setObj(self.x, self.con.frame.ball.y) #obj do robô é o seu próprio x e a posição do eixo y da bola
+
+        if self.estado == "ALINHAR":
+            #verifica se o robô está fora do retangulo seguro
+            if self.collision():
+                self.estado = "RE" #muda o estado
+
+
+            #verifica se o robô chegou no objetivo
+            elif self.arrived():
+                self.estado = "ESPERA"
+>>>>>>> 6b6d327 (sem modificações importantes)
 
         #verifica se o robô chegou no objetivo
         elif self.arrived() and self.estado != "CHUTAR":
@@ -217,6 +232,7 @@ class Defender:
                 self.passos = 0 #reseta os passos
                 self.estado = "ALINHAR" #troca de estado
 
+<<<<<<< HEAD
         elif self.estado == "CHUTAR":
             #Se o robo estiver na parte superior do campo chuta rodando no sentido anti-horario
             if self.y >= 0:
@@ -226,6 +242,11 @@ class Defender:
                 self.con.sendOne(self.id,self.vb,-self.vb)
             d = math.sqrt((self.xobj - self.x)**2 +(self.yobj - self.y)**2)
             if d >= 0.15:
+=======
+
+        elif self.estado == "ESPERA": #continua no estado até que a bola
+            if not(self.arrived()): #se a diferença do eixo y da bola com o do robô
+>>>>>>> 6b6d327 (sem modificações importantes)
                 self.estado = "ALINHAR"
 
 

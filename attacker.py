@@ -1,7 +1,7 @@
 import math
 class Attacker:
 
-    def __init__(self): #métodos do robô
+    def __init__(self): #atributos do robô
         self.id = 0 #identidade padrão
         self.x = 0 #eixo X do robô
         self.y = 0 #eixo Y do robô
@@ -39,29 +39,6 @@ class Attacker:
 
 
     #LÓGICAS DO ROBÔ A BAIXO:
-
-    def olhabola(self, angulo_ro):
-        erro = angulo_ro - self.orientation
-        if math.fabs(erro) > math.pi:
-            if self.orientation < 0:
-                self.orientation = 2*math.pi + self.orientation
-            if angulo_ro < 0:
-                angulo_ro = 2*math.pi + angulo_ro
-            erro = angulo_ro - self.orientation
-        ce = cd = 0
-        cr = self.kp*math.fabs(erro)
-        if erro > 0:
-            cd = cr
-            ce = -cr
-        elif erro < 0:
-            ce = cr
-            cd = -cr
-        self.ve = self.vb + ce
-        self.vd = self.vb + cd
-        
-        self.con.sendOne(self.id, self.ve, self.vd)
-        
-
 
     def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
         erro = angulo_ro - self.orientation
@@ -132,25 +109,17 @@ class Attacker:
 
     def update(self): #estados do atacante
         if self.estado == "ATACAR":
-            #corre atrás da bola
-            angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-            self.controladorP(angulo_ro)
-            self.con.sendOne(self.id, self.ve, self.vd)
-
-            if self.xobj < 0: #se a bola for no campo de defesa, espera
+            if self.xobj > 0:
+                #corre atrás da bola
+                angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
+                self.controladorP(angulo_ro)
+                self.con.sendOne(self.id, self.ve, self.vd)
+            else:
                 self.estado = "ESPERA"
 
             #verifica se o robô está fora do retangulo seguro
             if self.collision(): #or self.stuck
                 self.estado = "RE" #muda o estado
-
-
-        elif self.estado == "IR_CAMPO": #vai no campo de ataque
-            angulo_ro = math.atan2(0 - self.y, 0.10 - self.x) #segue retão até o objetivo a frente do meio de campo
-            self.controladorP(angulo_ro)
-            self.con.sendOne(self.id, self.ve, self.vd)
-            if self.x > 0: #ta no campo de ataque
-                self.estado = "ATACAR" #só depois de estar no campo de ataque que ele troca de estado
 
 
         elif self.estado == "RE":
@@ -169,4 +138,8 @@ class Attacker:
 
 
         elif self.estado == "PARADO":
-            self.estado = "IR_CAMPO"
+            angulo_ro = math.atan2(0 - self.y, 0.05 - self.x) #segue retão até o objetivo a frente do meio de campo
+            self.controladorP(angulo_ro)
+            self.con.sendOne(self.id, self.ve, self.vd)
+            if self.x > 0: #ta no campo de ataque
+                self.estado = "ATACAR" #só depois de estar no campo de ataque que ele troca de estado

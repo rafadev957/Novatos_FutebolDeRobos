@@ -40,7 +40,7 @@ while True:
 
 
         #ATUALIZAÇÃO OS ROBÔS NO CAMPO
-        #r0.update()
+        r0.update()
         r1.update()
         r2.update()
 
