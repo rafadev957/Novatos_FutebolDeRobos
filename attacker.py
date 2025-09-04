@@ -40,7 +40,8 @@ class Attacker:
 
     #LÓGICAS DO ROBÔ A BAIXO:
 
-    def controladorP(self, angulo_ro): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
+    def controladorP(self, x, y): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
+        angulo_ro = math.atan2(y - self.y, x - self.x) # só passar o y e o x do objetivo
         erro = angulo_ro - self.orientation
         if math.fabs(erro) > math.pi:
             if self.orientation < 0:
@@ -69,7 +70,8 @@ class Attacker:
     def collision(self): #colisão com parede
         #tamanho do campo - margem = perigo
         margem_segura = 0.1 #não para nas quinas, variável local
-        if (self.x <= (0.75 - margem_segura) and self.x >= (-0.75 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
+        # 0.75 >= x >= 0 and 0.65 >= y >= -0.65
+        if (self.x <= (0.75 - margem_segura) and self.x >= (0 + margem_segura)) and (self.y <= (0.65 - margem_segura) and self.y >= (-0.65 + margem_segura)):
             self.contador = 0
             return False
         
@@ -77,7 +79,7 @@ class Attacker:
             self.contador += 1
             #print("contador para perigo: {}".format(self.contador)) #debuger
             #loop para ele não dar ré só por passar na margem
-            if self.contador >= 45:
+            if self.contador >= 20:
                 self.contador = 0
                 #print("PERIGO \n"*5) #debuger
                 return True
@@ -108,18 +110,24 @@ class Attacker:
     """
 
     def update(self): #estados do atacante
+        if self.x < 0.05:
+            self.estado = "ALINHAR"
+
         if self.estado == "ATACAR":
-            if self.xobj > 0:
-                #corre atrás da bola
-                angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-                self.controladorP(angulo_ro)
-                self.con.sendOne(self.id, self.ve, self.vd)
-            else:
-                self.estado = "ESPERA"
+            #corre atrás da bola
+            self.controladorP(self.xobj, self.yobj) #parâmetros de x e y como objetivo
+            self.con.sendOne(self.id, self.ve, self.vd)
 
             #verifica se o robô está fora do retangulo seguro
             if self.collision(): #or self.stuck
                 self.estado = "RE" #muda o estado
+            
+
+        elif self.estado == "ALINHAR":
+            self.controladorP(0.2, 0) # parâmetros de alinhamento, x e y do objetivo dado ao robô
+            self.con.sendOne(self.id, self.ve, self.vd)
+            if self.arrived() < 0.1: #chegou no objetivo
+                self.estado = "ESPERA"
 
 
         elif self.estado == "RE":
@@ -127,19 +135,21 @@ class Attacker:
             self.con.sendOne(self.id, -40, -40)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
+                self.con.sendOne(self.id, 0, 0)
                 self.passos = 0 #reseta os passos
                 self.estado = "ATACAR" #troca de estado
 
+                if self.xobj < 0:
+                    self.estado = "ALINHAR"
+
 
         elif self.estado == "ESPERA":
-            self.sendOne(self.id, 0, 0)
-            if self.xobj > 0: #a bola ta no campo de ataque
+            self.con.sendOne(self.id, 0, 0)
+            if self.xobj >= 0.1: #a bola esta no campo de ataque
                 self.estado = "ATACAR"
+            elif self.x < 0.1: #o robô esta no campo de defesa
+                self.estado = "ALINHAR"
 
 
         elif self.estado == "PARADO":
-            angulo_ro = math.atan2(0 - self.y, 0.05 - self.x) #segue retão até o objetivo a frente do meio de campo
-            self.controladorP(angulo_ro)
-            self.con.sendOne(self.id, self.ve, self.vd)
-            if self.x > 0: #ta no campo de ataque
-                self.estado = "ATACAR" #só depois de estar no campo de ataque que ele troca de estado
+            self.estado = "ALINHAR"
