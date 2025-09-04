@@ -109,6 +109,7 @@ class Defender:
 
 
     def controladorP(self): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
+        #Calculo de erro em relação a orientação dianteira
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         erro1 = angulo_ro - self.orientation
         if math.fabs(erro1) > math.pi:
@@ -117,7 +118,8 @@ class Defender:
             if angulo_ro < 0:
                 angulo_ro = 2*math.pi + angulo_ro
             erro1 = angulo_ro - self.orientation
-        
+
+        #Calculo de erro em relação a orientação traseira
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         self.orientation = -(math.pi-self.orientation)
         erro2 = self.orientation - angulo_ro 
@@ -127,9 +129,12 @@ class Defender:
             if angulo_ro < 0:
                 angulo_ro = 2*math.pi + angulo_ro
             erro2 = self.orientation - angulo_ro 
-        print(erro1,erro2)
         
-        if abs(erro1) < abs(erro2):
+        #Calculo da diferença entre os erros
+        dif_erros = abs(erro1)-abs(erro2)
+
+        #Se a orientação dianteira estiver mais perto da bolinha, anda de frente atrás da bola
+        if abs(erro1) < abs(erro2) and abs(dif_erros) >= 0.2:
             ce = cd = 0
             cr = self.kp*math.fabs(erro1)
             if erro1 > 0:
@@ -140,7 +145,9 @@ class Defender:
                 cd = -cr
             self.ve = self.vb + ce
             self.vd = self.vb + cd
-        else:   
+        
+        #Se a orientação traseira estiver mais perto da bolinha, anda de costas atrás da bola
+        elif abs(erro1) > abs(erro2) and abs(dif_erros) >= 0.2:   
             ce = cd = 0
             cr = self.kp*math.fabs(erro2)
             if erro2 > 0:
@@ -152,9 +159,17 @@ class Defender:
             self.ve = -self.vb + ce
             self.vd = -self.vb + cd
         
-        
+        else:
+            if dif_erros <= 0:
+                #SE a bolinha estiver na mesmo linha do robo com baixa diferença entre os erros gire para tomar uma decisão
+                self.ve = 7
+                self.vd = -7 #Valor 7 definido a partir de testes PROVAVELMENTE tem forma melhor de fazer isso
+            else:
+                self.ve = -7
+                self.vd = 7
         
     def update(self): #estados do defensor
+        print(self.estado)
         #Se a bolinha estiver fora da área de atuação do defensor faça: 
         if self.xobj >= 0 or self.xobj < -0.375: 
             if self.estado == "ALINHAR":
@@ -173,8 +188,8 @@ class Defender:
                     self.estado = "ALINHAR_BOLINHA"
                 
             elif self.estado == "ALINHAR_BOLINHA":
-                #Para evitar com que o robô trave no estado de alinhar a bolinha fora do local determinado
-                if self.xobj > -0.375 and self.x < -0.35 and self.x > -0.39: 
+                #Para evitar com que o robô trave no estado de alinhar com a bolinha fora do local determinado
+                if self.xobj > 0 and self.x <= 0 and self.x >= -0.42: 
                     self.AlignmentWithBall()
                     self.con.sendOne(self.id, self.ve, self.vd) 
                 else:
@@ -182,11 +197,9 @@ class Defender:
                  
         #Se a bolinha passar para o campo defensivo/de atuação do defensor faça:   
         else:
+            self.estado = "ALINHAR"
             self.controladorP()
             self.con.sendOne(self.id, self.ve, self.vd)  
-
-            if self.xobj >= 0 or self.xobj < -0.375:
-                self.estado = "ALINHAR"
         
         #verifica se o robô está fora do retangulo seguro
         if self.collision():
