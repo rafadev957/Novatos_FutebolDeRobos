@@ -1,6 +1,7 @@
 import sys, os, time
 sys.path.append(os.path.join(os.path.dirname(__file__), 'communication'))
 from communication import Communication
+from referee import Referee
 from attacker import Attacker
 from defender import Defender
 from goalkeeper import Goalkeeper
@@ -10,13 +11,16 @@ r0 = Attacker()   #FICA NO CAMPO DE ATAQUE
 r1 = Defender()   #FICA NO CAMPO DE DEFESA
 r2 = Goalkeeper() #FICA NO CAMPO DO GOL
 
+ref = Referee("224.5.23.2:10004", "224.5.23.2:10003")
+ref.startServer()
+
 con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
 
 #COMUNICAÇÃO DOS ROBÔS COM O SERVIDOR
-r0.setCommunication(con)
-r1.setCommunication(con)
-r2.setCommunication(con)
+r0.setCommunication(con, ref)
+r1.setCommunication(con, ref)
+r2.setCommunication(con, ref)
 
 while True:
     
@@ -49,3 +53,10 @@ while True:
         
         #DELAY DO TEMPO DE RESPOSTA DO SIMULADOR E O CÓDIGO
         time.sleep(0.1)
+
+
+"""
+exemplo para pegar a velociade do robô n
+r1.setVelocity(con.frame.robots_yellow[r1.id].vx, 
+                       con.frame.robots_yellow[r1.id].vy)
+"""

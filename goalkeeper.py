@@ -17,10 +17,12 @@ class Goalkeeper:
         self.passos = 0 #passos do robô para dar ré
         self.contador_re = 0 #contador de tempo para a ré
         self.con = None #comunicação
+        self.referee = None #JUIZ
 
 
-    def setCommunication(self, con): #comunicação do simulador e o código (robô)
+    def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
         self.con = con
+        self.referee = referee
 
 
     def setObj(self, x, y): #cria o objetivo do robô sendo a bola a partir dos eixos X e Y do robô

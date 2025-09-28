@@ -1,4 +1,6 @@
-import math
+import math, sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'pb'))
+from pb import vssref_common_pb2
 class Attacker:
 
     def __init__(self): #atributos do robô
@@ -16,17 +18,14 @@ class Attacker:
         self.t0 = 0 #tempo inicial de espera
         self.passos = 0 #passos do robô para dar ré
         self.contador = 0 #contador de tempo da ré e do stuck
-        #self.tx = 0 #eixo x do robô após um determinado tempo
-        #self.ty = 0 #eixo y do robô após um determinado tempo
-        #self.var_posx = 0 #variação do eixo x do robô
-        #self.var_posy = 0 #variação do eixo y do robô
-        #self.vx = 0
-        #self.vy = 0
+        """#self.tx = 0 #eixo x do robô após um determinado tempo #self.ty = 0 #eixo y do robô após um determinado tempo #self.var_posx = 0 #variação do eixo x do robô #self.var_posy = 0 #variação do eixo y do robô #self.vx = 0 #self.vy = 0"""
         self.con = None #comunicação
+        self.referee = None #JUIZ
 
 
-    def setCommunication(self, con): #comunicação do simulador e o código (robô)
+    def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
         self.con = con
+        self.referee = referee
 
 
     def setObj(self, x, y): #cria o objetivo do robô sendo a bola a partir dos eixos X e Y do robô
@@ -80,9 +79,10 @@ class Attacker:
 
 
     def arrived(self): #distância do objetivo e o robô
-        d = math.sqrt((0.10 - self.x)**2 + (0 - self.y)**2)
+        d = math.sqrt((0.1 - self.x)**2 + (0 - self.y)**2)
         #print("distância do robô ao obj: {:.4f}".format(d))
-        return d
+        if d <= 0.1:
+            return True
 
 
     def collision(self): #colisão com parede
@@ -109,25 +109,56 @@ class Attacker:
     """
 
     def update(self): #estados do atacante
+        foul = self.referee.foul
+        if foul == vssref_common_pb2.FREE_BALL:
+            #print("Free ball")
+            self.estado = "ESPERA_RECOMECO"
+            #if self.referee.team == vssref_common_pb2.YELLOW:
+                #print("Ocorreu falta para o time azul")
+            #if self.referee.quadrant == vssref_common_pb2.QUADRANT_1:
+                #print("Ocorreu no quadrante 1")
+        elif foul == vssref_common_pb2.GAME_ON:
+            #print("Recomeçou")
+            self.estado = "ATACAR"
+
+
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        if self.x < 0.05:
+        if self.collision() == True:
+            self.estado = "RE" #muda o estado
+
+
+        if self.x < 0:
             self.estado = "ALINHAR"
 
         if self.estado == "ATACAR":
             #corre atrás da bola
             self.controladorP(angulo_ro) #parâmetros de x e y como objetivo
             self.con.sendOne(self.id, self.ve, self.vd)
-
             #verifica se o robô está fora do retangulo seguro
-        if self.collision() == True:
-            self.estado = "RE" #muda o estado
             
 
         elif self.estado == "ALINHAR":
-            angulo_ro = math.atan2(0 - self.y, 0.2 - self.x)
-            self.controladorP(angulo_ro) # parâmetros de alinhamento, x e y do objetivo dado ao robô
-            self.con.sendOne(self.id, self.ve, self.vd)
-            if self.arrived() < 0.1: #chegou no objetivo
+            angulo_ro = math.atan2(0 - self.y, 0.1 - self.x) # yobjetivo, xobjetivo
+            erro = angulo_ro - self.orientation
+
+            if math.fabs(erro) > math.pi:
+                
+                if self.orientation < 0: #orientação negativa
+                    self.orientation = 2*math.pi + self.orientation
+                
+                if angulo_ro < 0:
+                    angulo_ro = 2*math.pi + angulo_ro
+
+                erro = angulo_ro - self.orientation
+
+            if erro > 0.4:
+                self.con.sendOne(self.id, -4, 4)
+            elif erro < -0.4:
+                self.con.sendOne(self.id, 4, -4)
+            else:
+                self.con.sendOne(self.id, self.vb, self.vb)
+            
+            if self.arrived(): #chegou no objetivo
                 self.estado = "ESPERA"
 
 
@@ -138,19 +169,29 @@ class Attacker:
             if self.passos >= 10: #conta x passos para trás
                 self.con.sendOne(self.id, 0, 0)
                 self.passos = 0 #reseta os passos
-                self.estado = "ATACAR" #troca de estado
-
-                if self.xobj < 0:
+                if self.passos == 0:
+                    self.estado = "ATACAR" #troca de estado
+                if self.xobj < 0.1 and self.collision() == False:
                     self.estado = "ALINHAR"
 
 
         elif self.estado == "ESPERA":
             self.con.sendOne(self.id, 0, 0)
-            if self.xobj >= 0.3: #a bola esta no campo de ataque
+            
+            if self.collision() == True:
+                self.estado == "RE"
+                
+            elif self.xobj > 0.1 and self.estado != "RE": #a bola esta no campo de ataque
                 self.estado = "ATACAR"
-            elif self.x < 0: #o robô esta no campo de defesa
+            elif self.x < 0.1 and self.estado != "RE": #o robô esta no campo de defesa
                 self.estado = "ALINHAR"
 
 
         elif self.estado == "PARADO":
             self.estado = "ALINHAR"
+
+
+        elif self.estado == "ESPERA_RECOMECO":
+            pass
+    
+        print(self.estado)
