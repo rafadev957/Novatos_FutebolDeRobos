@@ -67,6 +67,30 @@ class Defender:
                 return True
 
 
+    def CalculateError(self,Flag,x_obj,y_obj): #Se Flag == True calcula o erro em relação a orientação dianteira, else calcula da traseira
+        angulo_ro = math.atan2(y_obj - self.y, x_obj - self.x)
+        #Correção em relação ao pi e -pi 
+        if Flag == True:
+            erro = angulo_ro - self.orientation
+            if math.fabs(erro) > math.pi:
+                if self.orientation < 0:
+                    self.orientation = 2*math.pi + self.orientation
+                if angulo_ro < 0:
+                    angulo_ro = 2*math.pi + angulo_ro
+                erro = angulo_ro - self.orientation
+            return erro
+        else:
+            self.orientation = -(math.pi-self.orientation)
+            erro = self.orientation - angulo_ro 
+            if math.fabs(erro) > math.pi:
+                if self.orientation < 0:
+                    self.orientation = 2*math.pi + self.orientation
+                if angulo_ro < 0:
+                    angulo_ro = 2*math.pi + angulo_ro
+                erro = self.orientation - angulo_ro
+            return erro
+
+
     def AlignmentWithX(self): #Se perder o alinhamento com x determinado (-0.37)
         x_ponto = -0.37
         y_ponto = self.y
