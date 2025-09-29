@@ -177,7 +177,6 @@ class Defender:
 
     def update(self): #estados do defensor
         foul = self.referee.foul 
-        
         if foul != vssref_common_pb2.GAME_ON:
             self.estado = "ESPERA_RECOMECO"
         
@@ -185,24 +184,24 @@ class Defender:
         elif self.xobj >= 0 or self.xobj < -0.375: 
             if self.estado == "ALINHAR":
                 self.AlignmentWithX()
-                self.con.sendOne(self.id, self.ve, self.vd,False)  
+                self.con.sendOne(self.id, self.ve, self.vd)  
 
             elif self.estado == "ALINHAR_VERTICAL":
                 erro = math.pi/2 - self.orientation #calculo do erro de alinhamento com a vertical se orientando para cima
                 vr = abs(erro)*10 #calculo da velocidade de rotação proporcional ou tamanho do erro
                 if self.orientation <= math.pi/2 - 0.001:
-                    self.con.sendOne(self.id,-vr,vr,False)
+                    self.con.sendOne(self.id,-vr,vr)
                 elif self.orientation >= math.pi/2 + 0.001:
-                    self.con.sendOne(self.id,vr,-vr,False)
+                    self.con.sendOne(self.id,vr,-vr)
                 else:
-                    self.con.sendOne(self.id,0,0,False)
+                    self.con.sendOne(self.id,0,0)
                     self.estado = "ALINHAR_BOLINHA"
                 
             elif self.estado == "ALINHAR_BOLINHA":
                 #Para evitar com que o robô trave no estado de alinhar a bolinha fora do local determinado
                 if self.xobj > -0.375 and self.x < -0.35 and self.x > -0.39: 
                     self.AlignmentWithBall()
-                    self.con.sendOne(self.id, self.ve, self.vd,False) 
+                    self.con.sendOne(self.id, self.ve, self.vd) 
                 else:
                     self.estado ="ALINHAR"
                  
@@ -210,7 +209,7 @@ class Defender:
         else:
             self.estado = "ALINHAR"
             self.controladorP()
-            self.con.sendOne(self.id, self.ve, self.vd,False)  
+            self.con.sendOne(self.id, self.ve, self.vd)  
         
         #verifica se o robô está fora do retangulo seguro
         """if self.collision():
@@ -219,12 +218,12 @@ class Defender:
 
         #verifica se o robô chegou no objetivo
         if self.arrived() and self.estado != "CHUTAR":
-            self.con.sendOne(self.id, 0, 0,False)
+            self.con.sendOne(self.id, 0, 0)
             self.estado = "CHUTAR"
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -30, -30,False)
+            self.con.sendOne(self.id, -30, -30)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
@@ -233,16 +232,16 @@ class Defender:
         elif self.estado == "CHUTAR":
             #Se o robo estiver na parte superior do campo chuta rodando no sentido anti-horario
             if self.y >= 0:
-                self.con.sendOne(self.id,-self.vb,self.vb,False)
+                self.con.sendOne(self.id,-self.vb,self.vb)
             #Se o robo estiver na parte inferior do campo chuta rodando no sentido horario
             elif self.y < 0:
-                self.con.sendOne(self.id,self.vb,-self.vb,False)
+                self.con.sendOne(self.id,self.vb,-self.vb)
             d = math.sqrt((self.xobj - self.x)**2 +(self.yobj - self.y)**2)
             if d >= 0.15:
                 self.estado = "ALINHAR"
 
         elif self.estado == "ESPERA_RECOMECO":
-            self.con.sendOne(self.id,0,0,False)
+            self.con.sendOne(self.id,0,0)
             if foul == vssref_common_pb2.GAME_ON:
                 self.estado = "ALINHAR"
 

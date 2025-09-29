@@ -158,9 +158,9 @@ class Goalkeeper:
         elif self.estado == "ALINHAR_BOLINHA":
             self.AlignmentWithBall()
             self.PositionCheck()
-            self.con.sendOne(self.id, self.ve, self.vd,False)
+            self.con.sendOne(self.id, self.ve, self.vd)
             if self.arrived():
-                self.con.sendOne(self.id, 0, 0,False)
+                self.con.sendOne(self.id, 0, 0)
                 self.estado = "CHUTAR"
 
             #Se perder o alinhamento com a vertical, realinhar com a vertical orientando apra cima
@@ -180,9 +180,9 @@ class Goalkeeper:
             vr = abs(erro)*10 #calculo da velocidade de rotação proporcional ou tamanho do erro
         
             if self.orientation <= math.pi/2 - 0.001:
-                self.con.sendOne(self.id,-vr,vr,False)
+                self.con.sendOne(self.id,-vr,vr)
             elif self.orientation >= math.pi/2 + 0.001:
-                self.con.sendOne(self.id,vr,-vr,False)
+                self.con.sendOne(self.id,vr,-vr)
             else:
                 self.con.sendOne(self.id,0,0)
                 self.estado = "ALINHAR_BOLINHA"
@@ -190,23 +190,23 @@ class Goalkeeper:
 
         elif self.estado == "REPOSICIONAR":
             self.AlignmentWithX()
-            self.con.sendOne(self.id,self.ve,self.vd,False)
+            self.con.sendOne(self.id,self.ve,self.vd)
         
         
         elif self.estado == "CHUTAR":
             #Se o robo estiver na parte superior do campo chuta rodando no sentido anti-horario
             if self.y >= 0:
-                self.con.sendOne(self.id,-self.vb,self.vb,False)
+                self.con.sendOne(self.id,-self.vb,self.vb)
             #Se o robo estiver na parte inferior do campo chuta rodando no sentido horario
             elif self.y < 0:
-                self.con.sendOne(self.id,self.vb,-self.vb,False)
+                self.con.sendOne(self.id,self.vb,-self.vb)
             d = math.sqrt((self.xobj - self.x)**2 +(self.yobj - self.y)**2)
             if d >= 0.2:
                 self.estado = "ALINHAR_BOLINHA"
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -30, -30,False)
+            self.con.sendOne(self.id, -30, -30)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
@@ -216,7 +216,7 @@ class Goalkeeper:
             self.estado = "ALINHAR_VERTICAL"
         
         if self.estado == "ESPERA_RECOMECO":
-            self.con.sendOne(self.id,0,0,False)
+            self.con.sendOne(self.id,0,0)
             if foul == vssref_common_pb2.GAME_ON:
                 self.estado = "REPOSICIONAR"
             
