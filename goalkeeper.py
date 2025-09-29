@@ -1,4 +1,6 @@
-import math
+import math, sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'pb'))
+from pb import vssref_common_pb2
 class Goalkeeper:
 
     def __init__(self): #atributos do robô
@@ -148,13 +150,17 @@ class Goalkeeper:
         
 
     def update(self): #estados do goleiro
-        angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        if self.estado == "ALINHAR_BOLINHA":
+        foul = self.referee.foul 
+        if foul != vssref_common_pb2.GAME_ON:
+            self.estado = "ESPERA_RECOMECO"
+
+
+        elif self.estado == "ALINHAR_BOLINHA":
             self.AlignmentWithBall()
             self.PositionCheck()
-            self.con.sendOne(self.id, self.ve, self.vd)
+            self.con.sendOne(self.id, self.ve, self.vd,False)
             if self.arrived():
-                self.con.sendOne(self.id, 0, 0)
+                self.con.sendOne(self.id, 0, 0,False)
                 self.estado = "CHUTAR"
 
             #Se perder o alinhamento com a vertical, realinhar com a vertical orientando apra cima
@@ -174,9 +180,9 @@ class Goalkeeper:
             vr = abs(erro)*10 #calculo da velocidade de rotação proporcional ou tamanho do erro
         
             if self.orientation <= math.pi/2 - 0.001:
-                self.con.sendOne(self.id,-vr,vr)
+                self.con.sendOne(self.id,-vr,vr,False)
             elif self.orientation >= math.pi/2 + 0.001:
-                self.con.sendOne(self.id,vr,-vr)
+                self.con.sendOne(self.id,vr,-vr,False)
             else:
                 self.con.sendOne(self.id,0,0)
                 self.estado = "ALINHAR_BOLINHA"
@@ -184,28 +190,33 @@ class Goalkeeper:
 
         elif self.estado == "REPOSICIONAR":
             self.AlignmentWithX()
-            self.con.sendOne(self.id,self.ve,self.vd)
+            self.con.sendOne(self.id,self.ve,self.vd,False)
         
         
         elif self.estado == "CHUTAR":
             #Se o robo estiver na parte superior do campo chuta rodando no sentido anti-horario
             if self.y >= 0:
-                self.con.sendOne(self.id,-self.vb,self.vb)
+                self.con.sendOne(self.id,-self.vb,self.vb,False)
             #Se o robo estiver na parte inferior do campo chuta rodando no sentido horario
             elif self.y < 0:
-                self.con.sendOne(self.id,self.vb,-self.vb)
+                self.con.sendOne(self.id,self.vb,-self.vb,False)
             d = math.sqrt((self.xobj - self.x)**2 +(self.yobj - self.y)**2)
             if d >= 0.2:
                 self.estado = "ALINHAR_BOLINHA"
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -30, -30)
+            self.con.sendOne(self.id, -30, -30,False)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
                 self.passos = 0 #reseta os passos
                 self.estado = "IR_ATE" #troca de estado
-    
+
         elif self.estado == "PARADO":
             self.estado = "ALINHAR_VERTICAL"
+        
+        if self.estado == "ESPERA_RECOMECO":
+            self.con.sendOne(self.id,0,0,False)
+            if foul == vssref_common_pb2.GAME_ON:
+                self.estado = "REPOSICIONAR"
             

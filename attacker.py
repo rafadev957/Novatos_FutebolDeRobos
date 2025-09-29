@@ -110,7 +110,9 @@ class Attacker:
 
     def update(self): #estados do atacante
         foul = self.referee.foul
-        if foul == vssref_common_pb2.FREE_BALL:
+        if foul != vssref_common_pb2.GAME_ON:
+            self.estado = "ESPERA_RECOMECO"
+        """if foul == vssref_common_pb2.FREE_BALL:
             #print("Free ball")
             self.estado = "ESPERA_RECOMECO"
             #if self.referee.team == vssref_common_pb2.YELLOW:
@@ -120,7 +122,7 @@ class Attacker:
         elif foul == vssref_common_pb2.GAME_ON:
             #print("Recomeçou")
             self.estado = "ATACAR"
-
+        """
 
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
         if self.collision() == True:
@@ -133,7 +135,7 @@ class Attacker:
         if self.estado == "ATACAR":
             #corre atrás da bola
             self.controladorP(angulo_ro) #parâmetros de x e y como objetivo
-            self.con.sendOne(self.id, self.ve, self.vd)
+            self.con.sendOne(self.id, self.ve, self.vd,False)
             #verifica se o robô está fora do retangulo seguro
             
 
@@ -152,11 +154,11 @@ class Attacker:
                 erro = angulo_ro - self.orientation
 
             if erro > 0.4:
-                self.con.sendOne(self.id, -4, 4)
+                self.con.sendOne(self.id, -4, 4,False)
             elif erro < -0.4:
-                self.con.sendOne(self.id, 4, -4)
+                self.con.sendOne(self.id, 4, -4,False)
             else:
-                self.con.sendOne(self.id, self.vb, self.vb)
+                self.con.sendOne(self.id, self.vb, self.vb,False)
             
             if self.arrived(): #chegou no objetivo
                 self.estado = "ESPERA"
@@ -164,10 +166,10 @@ class Attacker:
 
         elif self.estado == "RE":
             #print("dando ré") #debuger da ré
-            self.con.sendOne(self.id, -self.vb, -self.vb)
+            self.con.sendOne(self.id, -self.vb, -self.vb,False)
             self.passos += 1
             if self.passos >= 10: #conta x passos para trás
-                self.con.sendOne(self.id, 0, 0)
+                self.con.sendOne(self.id, 0, 0,False)
                 self.passos = 0 #reseta os passos
                 if self.passos == 0:
                     self.estado = "ATACAR" #troca de estado
@@ -176,7 +178,7 @@ class Attacker:
 
 
         elif self.estado == "ESPERA":
-            self.con.sendOne(self.id, 0, 0)
+            self.con.sendOne(self.id, 0, 0,False)
             
             if self.collision() == True:
                 self.estado == "RE"
@@ -192,6 +194,8 @@ class Attacker:
 
 
         elif self.estado == "ESPERA_RECOMECO":
-            pass
+            self.con.sendOne(self.id,0,0,False)
+            if foul == vssref_common_pb2.GAME_ON:
+                self.estado = "ATACAR"
     
-        print(self.estado)
+        #print(self.estado)

@@ -24,18 +24,18 @@ r2.setCommunication(con, ref)
 
 while True:
     
-    if len(con.frame.robots_yellow) > 0: #garante que haja algo na lista de robos
+    if len(con.frame.robots_blue) > 0: #garante que haja algo na lista de robos
 
         #POSE DOS ROBÔS EM RELAÇÃO COM O MUNDO
-        r0.setPose(con.frame.robots_yellow[r0.id].x, 
-                   con.frame.robots_yellow[r0.id].y, 
-                   con.frame.robots_yellow[r0.id].orientation)
-        r1.setPose(con.frame.robots_yellow[r1.id].x, 
-                   con.frame.robots_yellow[r1.id].y, 
-                   con.frame.robots_yellow[r1.id].orientation)
-        r2.setPose(con.frame.robots_yellow[r2.id].x, 
-                   con.frame.robots_yellow[r2.id].y, 
-                   con.frame.robots_yellow[r2.id].orientation) 
+        r0.setPose(con.frame.robots_blue[r0.id].x, 
+                   con.frame.robots_blue[r0.id].y, 
+                   con.frame.robots_blue[r0.id].orientation)
+        r1.setPose(con.frame.robots_blue[r1.id].x, 
+                   con.frame.robots_blue[r1.id].y, 
+                   con.frame.robots_blue[r1.id].orientation)
+        r2.setPose(con.frame.robots_blue[r2.id].x, 
+                   con.frame.robots_blue[r2.id].y, 
+                   con.frame.robots_blue[r2.id].orientation) 
 
         #OBJETIVOS DOS ROBÔS
         r0.setObj(con.frame.ball.x, con.frame.ball.y)
