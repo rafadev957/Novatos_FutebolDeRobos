@@ -7,8 +7,8 @@ from defender import Defender
 from goalkeeper import Goalkeeper
 
 #INICIALIZAÇÃO DOS ROBÔS COM AS RESPECTIVAS CLASSES
-r0 = Attacker()   #FICA NO CAMPO DE ATAQUE
-r1 = Defender()   #FICA NO CAMPO DE DEFESA
+r1 = Attacker()   #FICA NO CAMPO DE ATAQUE
+r0 = Defender()   #FICA NO CAMPO DE DEFESA
 r2 = Goalkeeper() #FICA NO CAMPO DO GOL
 
 ref = Referee("224.5.23.2:10004", "224.5.23.2:10003")

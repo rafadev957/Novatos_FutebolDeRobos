@@ -96,15 +96,7 @@ class Defender:
         y_ponto = self.y
         d = math.sqrt((x_ponto - self.x)**2 +(y_ponto - self.y)**2) #distância do robô ao ponto (-0.37,0)
         angulo_ro = math.atan2(y_ponto - self.y, x_ponto - self.x) #ângulo de erro em relação ao ponto (-0.37,0)
-        erro = angulo_ro - self.orientation 
-
-        #correção em relação ao pi e -pi 
-        if math.fabs(erro) > math.pi: 
-            if self.orientation < 0:
-                self.orientation = 2*math.pi + self.orientation
-            if angulo_ro < 0:
-                angulo_ro = 2*math.pi + angulo_ro
-            erro = angulo_ro - self.orientation
+        erro = self.CalculateError(True,-0.37,self.y)
         ce = cd = 0
         cr = self.kp*abs(erro) #Correção das velocidades proporcional ao erro
         if erro < 0 - 0.05:
@@ -139,26 +131,11 @@ class Defender:
 
     def controladorP(self): #controlador da direção do robô, calcula o "erro" de ângulação entre o robô e a bola
         #Calculo de erro em relação a orientação dianteira
-        angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        erro1 = angulo_ro - self.orientation
-        if math.fabs(erro1) > math.pi:
-            if self.orientation < 0:
-                self.orientation = 2*math.pi + self.orientation
-            if angulo_ro < 0:
-                angulo_ro = 2*math.pi + angulo_ro
-            erro1 = angulo_ro - self.orientation
+        erro1 = self.CalculateError(True,self.xobj,self.yobj)
 
         #Calculo de erro em relação a orientação traseira
-        angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
-        self.orientation = -(math.pi-self.orientation)
-        erro2 = self.orientation - angulo_ro 
-        if math.fabs(erro2) > math.pi:
-            if self.orientation < 0:
-                self.orientation = 2*math.pi + self.orientation
-            if angulo_ro < 0:
-                angulo_ro = 2*math.pi + angulo_ro
-            erro2 = self.orientation - angulo_ro 
-        
+        erro2 = self.CalculateError(False,self.xobj,self.yobj)
+
         #Calculo da diferença entre os erros
         dif_erros = abs(erro1)-abs(erro2)
 
@@ -190,12 +167,14 @@ class Defender:
         
         else:
             if dif_erros <= 0:
-                #SE a bolinha estiver na mesmo linha do robo com baixa diferença entre os erros gire para tomar uma decisão
+                #SE a bolinha estiver na mesma linha do robo com baixa diferença entre os erros gire para tomar uma decisão
                 self.ve = 7
                 self.vd = -7 #Valor 7 definido a partir de testes PROVAVELMENTE tem forma melhor de fazer isso
             else:
                 self.ve = -7
                 self.vd = 7
+
+
     def update(self): #estados do defensor
         foul = self.referee.foul 
         
