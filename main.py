@@ -1,5 +1,6 @@
 import sys, os, time
 sys.path.append(os.path.join(os.path.dirname(__file__), 'communication'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'model'))
 from communication import Communication
 from referee import Referee
 from attacker import Attacker
@@ -7,8 +8,8 @@ from defender import Defender
 from goalkeeper import Goalkeeper
 
 #INICIALIZAÇÃO DOS ROBÔS COM AS RESPECTIVAS CLASSES
-r1 = Attacker()   #FICA NO CAMPO DE ATAQUE
-r0 = Defender()   #FICA NO CAMPO DE DEFESA
+r0 = Attacker()   #FICA NO CAMPO DE ATAQUE
+r1 = Defender()   #FICA NO CAMPO DE DEFESA
 r2 = Goalkeeper() #FICA NO CAMPO DO GOL
 
 ref = Referee("224.5.23.2:10004", "224.5.23.2:10003")
@@ -44,9 +45,9 @@ while True:
 
 
         #ATUALIZAÇÃO OS ROBÔS NO CAMPO
-        r0.update()
-        r1.update()
-        r2.update()
+        r0.update() #atacante
+        r1.update() #defensor
+        r2.update() #goleiro
 
         #TESTES DE SAIDAS AQUI:
         #print(con.frame.robots_yellow[r2.id].x, con.frame.robots_yellow[r2.id].y, con.frame.robots_yellow[r2.id].orientation)

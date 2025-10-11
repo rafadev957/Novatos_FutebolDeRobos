@@ -1,18 +1,14 @@
 import math, sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'pb'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))
 from pb import vssref_common_pb2
-class Attacker:
+from robot import Robot
+
+class Attacker(Robot):
 
     def __init__(self): #atributos do robô
-        self.id = 0 #identidade padrão
-        self.x = 0 #eixo X do robô
-        self.y = 0 #eixo Y do robô
-        self.orientation = 0 #orientação (radianos)
-        self.ve = 0 #velocidade roda esquerda
-        self.vd = 0 #velocidade roda direita
+        super().__init__()
         self.xobj = 0 #eixo X do objetivo do robô (bola)
         self.yobj = 0 #eixo Y do objetivo do robô (bola)
-        self.estado = "PARADO" #estado do robô
         self.vb = 40 #velocidade base das rodas
         self.kp = 7.5 #ajuste do erro (controladorP)
         self.t0 = 0 #tempo inicial de espera
