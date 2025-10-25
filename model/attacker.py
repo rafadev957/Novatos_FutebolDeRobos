@@ -1,25 +1,22 @@
 import math, sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))
-from pb import vssref_common_pb2
+"""sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))
+from pb import vssref_common_pb2"""
 from robot import Robot
 
 class Attacker(Robot):
 
-    def __init__(self): #atributos do robô
-        super().__init__()
+    def __init__(self, id, vb): #atributos do robô
+        super().__init__(id, vb)
         self.xobj = 0 #eixo X do objetivo do robô (bola)
         self.yobj = 0 #eixo Y do objetivo do robô (bola)
-        self.vb = 40 #velocidade base das rodas
         self.kp = 7.5 #ajuste do erro (controladorP)
         self.t0 = 0 #tempo inicial de espera
         self.passos = 0 #passos do robô para dar ré
         self.contador = 0 #contador de tempo da ré e do stuck
         """#self.tx = 0 #eixo x do robô após um determinado tempo #self.ty = 0 #eixo y do robô após um determinado tempo #self.var_posx = 0 #variação do eixo x do robô #self.var_posy = 0 #variação do eixo y do robô #self.vx = 0 #self.vy = 0"""
-        self.con = None #comunicação
-        self.referee = None #JUIZ
 
 
-    def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
+    """def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
         self.con = con
         self.referee = referee
 
@@ -32,7 +29,7 @@ class Attacker(Robot):
     def setPose(self, x, y, orientation): #cria a pose do robô (seu X, Y e Orientação) a partir da comunicação
         self.x = x
         self.y = y
-        self.orientation = orientation
+        self.orientation = orientation"""
     
 
     """def getVelocity(self):

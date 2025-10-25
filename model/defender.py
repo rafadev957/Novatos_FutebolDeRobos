@@ -1,24 +1,21 @@
 import math, sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))
-from pb import vssref_common_pb2
+"""sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))
+from pb import vssref_common_pb2"""
 from robot import Robot
 
 class Defender(Robot):
 
-    def __init__(self): #atributos do robô
-        super().__init__()
+    def __init__(self, id, vb): #atributos do robô
+        super().__init__(id, vb)
         self.xobj = 0 #eixo X do objetivo do robô (bola)
         self.yobj = 0 #eixo Y do objetivo do robô (bola)
-        self.vb = 40 #velocidade base das rodas
         self.kp = 10 #ajuste do erro (controlador)
         self.t0 = 0 #tempo inicial de espera
         self.passos = 0 #passos do robô para dar ré
         self.contador_re = 0 #contador de tempo para a ré
-        self.con = None #comunicação
-        self.referee = None #JUIZ
 
 
-    def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
+    """def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
         self.con = con
         self.referee = referee
 
@@ -31,7 +28,8 @@ class Defender(Robot):
     def setPose(self, x, y, orientation): #cria a pose do robô (seu X, Y e Orientação) a partir da comunicação
         self.x = x
         self.y = y
-        self.orientation = orientation
+        self.orientation = orientation"""
+
 
 
     #LÓGICAS DO ROBÔ A BAIXO:

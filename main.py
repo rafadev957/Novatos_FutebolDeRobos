@@ -3,14 +3,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'communication'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'model'))
 from communication import Communication
 from referee import Referee
-from attacker import Attacker
+from worldModel import WorldModel
+
+"""from attacker import Attacker
 from defender import Defender
 from goalkeeper import Goalkeeper
 
 #INICIALIZAÇÃO DOS ROBÔS COM AS RESPECTIVAS CLASSES
 r0 = Attacker()   #FICA NO CAMPO DE ATAQUE
 r1 = Defender()   #FICA NO CAMPO DE DEFESA
-r2 = Goalkeeper() #FICA NO CAMPO DO GOL
+r2 = Goalkeeper() #FICA NO CAMPO DO GOL"""
 
 ref = Referee("224.5.23.2:10004", "224.5.23.2:10003")
 ref.startServer()
@@ -18,14 +20,20 @@ ref.startServer()
 con = Communication("127.0.0.1:20011", "224.0.0.1:10002")
 con.startServer()
 
-#COMUNICAÇÃO DOS ROBÔS COM O SERVIDOR
+worldModel = WorldModel()
+
+worldModel.setCommunicationAndReferee(con, ref)
+
+"""#COMUNICAÇÃO DOS ROBÔS COM O SERVIDOR
 r0.setCommunication(con, ref)
 r1.setCommunication(con, ref)
-r2.setCommunication(con, ref)
+r2.setCommunication(con, ref)"""
 
 while True:
+    worldModel.update()    
+    time.sleep(0.1)
     
-    if len(con.frame.robots_blue) > 0: #garante que haja algo na lista de robos
+    """if len(con.frame.robots_blue) > 0: #garante que haja algo na lista de robos
 
         #POSE DOS ROBÔS EM RELAÇÃO COM O MUNDO
         r0.setPose(con.frame.robots_blue[r0.id].x, 
@@ -56,7 +64,6 @@ while True:
         time.sleep(0.1)
 
 
-"""
 exemplo para pegar a velociade do robô n
 r1.setVelocity(con.frame.robots_yellow[r1.id].vx, 
                        con.frame.robots_yellow[r1.id].vy)
