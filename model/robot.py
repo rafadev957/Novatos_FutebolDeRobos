@@ -24,3 +24,8 @@ class Robot:
         self.x = x
         self.y = y
         self.orientation = orientation
+    
+    def updatePose(self):
+        if len(self.con.frame.robots_yellow) > 0:
+            myself = self.con.frame.robots_yellow[self.id]
+            self.setPose(myself.x, myself.y, myself.orientation)

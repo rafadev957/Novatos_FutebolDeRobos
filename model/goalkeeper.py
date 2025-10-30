@@ -1,6 +1,6 @@
 import math, sys, os
-"""sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))
-from pb import vssref_common_pb2"""
+"""sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))"""
+from pb import vssref_common_pb2
 from robot import Robot
 
 class Goalkeeper(Robot):
