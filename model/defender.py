@@ -15,23 +15,6 @@ class Defender(Robot):
         self.contador_re = 0 #contador de tempo para a ré
 
 
-    """def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
-        self.con = con
-        self.referee = referee
-
-
-    def setObj(self, x, y): #cria o objetivo do robô sendo a bola a partir dos eixos X e Y do robô
-        self.xobj = x
-        self.yobj = y
-
-
-    def setPose(self, x, y, orientation): #cria a pose do robô (seu X, Y e Orientação) a partir da comunicação
-        self.x = x
-        self.y = y
-        self.orientation = orientation"""
-
-
-
     #LÓGICAS DO ROBÔ A BAIXO:
 
     def arrived(self): #distância do objetivo e o robô

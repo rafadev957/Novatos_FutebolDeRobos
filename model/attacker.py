@@ -1,9 +1,7 @@
-import math, sys, os
-"""sys.path.append(os.path.join(os.path.dirname(__file__), '../pb'))"""
-from pb import vssref_common_pb2
+import math
 from robot import Robot
 
-class Attacker(Robot):
+class Attacker(Robot):  #herdo de robot
 
     def __init__(self, id, vb): #atributos do robô
         super().__init__(id, vb)
@@ -13,28 +11,10 @@ class Attacker(Robot):
         self.t0 = 0 #tempo inicial de espera
         self.passos = 0 #passos do robô para dar ré
         self.contador = 0 #contador de tempo da ré e do stuck
-        """#self.tx = 0 #eixo x do robô após um determinado tempo #self.ty = 0 #eixo y do robô após um determinado tempo #self.var_posx = 0 #variação do eixo x do robô #self.var_posy = 0 #variação do eixo y do robô #self.vx = 0 #self.vy = 0"""
-
-
-    """def setCommunication(self, con, referee): #comunicação do simulador e o código (robô)
-        self.con = con
-        self.referee = referee
-
-
-    def setObj(self, x, y): #cria o objetivo do robô sendo a bola a partir dos eixos X e Y do robô
-        self.xobj = x
-        self.yobj = y
-
-
-    def setPose(self, x, y, orientation): #cria a pose do robô (seu X, Y e Orientação) a partir da comunicação
-        self.x = x
-        self.y = y
-        self.orientation = orientation"""
     
-
+    
     """def getVelocity(self):
         return math.sqrt()"""
-
     
     """def setVelocity(self, vx, vy):
         self.vx = vx
@@ -118,6 +98,7 @@ class Attacker(Robot):
         """
 
         angulo_ro = math.atan2(self.yobj - self.y, self.xobj - self.x)
+        
         if self.collision() == True:
             self.estado = "RE" #muda o estado
 
